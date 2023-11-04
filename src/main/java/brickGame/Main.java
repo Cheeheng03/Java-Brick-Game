@@ -5,6 +5,7 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -452,73 +453,79 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     }
 
     private void saveGame() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                new File(savePathDir).mkdirs();
-                File file = new File(savePath);
-                ObjectOutputStream outputStream = null;
-                try {
-                    outputStream = new ObjectOutputStream(new FileOutputStream(file));
-
-                    outputStream.writeInt(level);
-                    outputStream.writeInt(score);
-                    outputStream.writeInt(heart);
-                    outputStream.writeInt(destroyedBlockCount);
-
-
-                    outputStream.writeDouble(xBall);
-                    outputStream.writeDouble(yBall);
-                    outputStream.writeDouble(xBreak);
-                    outputStream.writeDouble(yBreak);
-                    outputStream.writeDouble(centerBreakX);
-                    outputStream.writeLong(time);
-                    outputStream.writeLong(goldTime);
-                    outputStream.writeDouble(vX);
-
-
-                    outputStream.writeBoolean(isExistHeartBlock);
-                    outputStream.writeBoolean(isGoldStauts);
-                    outputStream.writeBoolean(goDownBall);
-                    outputStream.writeBoolean(goRightBall);
-                    outputStream.writeBoolean(colideToBreak);
-                    outputStream.writeBoolean(colideToBreakAndMoveToRight);
-                    outputStream.writeBoolean(colideToRightWall);
-                    outputStream.writeBoolean(colideToLeftWall);
-                    outputStream.writeBoolean(colideToRightBlock);
-                    outputStream.writeBoolean(colideToBottomBlock);
-                    outputStream.writeBoolean(colideToLeftBlock);
-                    outputStream.writeBoolean(colideToTopBlock);
-
-                    ArrayList<BlockSerializable> blockSerializables = new ArrayList<BlockSerializable>();
-                    for (Block block : blocks) {
-                        if (block.isDestroyed) {
-                            continue;
-                        }
-                        blockSerializables.add(new BlockSerializable(block.row, block.column, block.type));
-                    }
-
-                    outputStream.writeObject(blockSerializables);
-
-                    new Score().showMessage("Game Saved", Main.this);
-
-
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } finally {
+        if (level < 18 && heart > 0) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    new File(savePathDir).mkdirs();
+                    File file = new File(savePath);
+                    ObjectOutputStream outputStream = null;
                     try {
-                        outputStream.flush();
-                        outputStream.close();
+                        outputStream = new ObjectOutputStream(new FileOutputStream(file));
+
+                        outputStream.writeInt(level);
+                        outputStream.writeInt(score);
+                        outputStream.writeInt(heart);
+                        outputStream.writeInt(destroyedBlockCount);
+
+                        outputStream.writeDouble(xBall);
+                        outputStream.writeDouble(yBall);
+                        outputStream.writeDouble(xBreak);
+                        outputStream.writeDouble(yBreak);
+                        outputStream.writeDouble(centerBreakX);
+                        outputStream.writeLong(time);
+                        outputStream.writeLong(goldTime);
+                        outputStream.writeDouble(vX);
+
+                        outputStream.writeBoolean(isExistHeartBlock);
+                        outputStream.writeBoolean(isGoldStauts);
+                        outputStream.writeBoolean(goDownBall);
+                        outputStream.writeBoolean(goRightBall);
+                        outputStream.writeBoolean(colideToBreak);
+                        outputStream.writeBoolean(colideToBreakAndMoveToRight);
+                        outputStream.writeBoolean(colideToRightWall);
+                        outputStream.writeBoolean(colideToLeftWall);
+                        outputStream.writeBoolean(colideToRightBlock);
+                        outputStream.writeBoolean(colideToBottomBlock);
+                        outputStream.writeBoolean(colideToLeftBlock);
+                        outputStream.writeBoolean(colideToTopBlock);
+
+                        ArrayList<BlockSerializable> blockSerializables = new ArrayList<BlockSerializable>();
+                        for (Block block : blocks) {
+                            if (block.isDestroyed) {
+                                continue;
+                            }
+                            blockSerializables.add(new BlockSerializable(block.row, block.column, block.type));
+                        }
+
+                        outputStream.writeObject(blockSerializables);
+
+                        new Score().showMessage("Game Saved", Main.this);
+
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
                     } catch (IOException e) {
                         e.printStackTrace();
+                    } finally {
+                        try {
+                            outputStream.flush();
+                            outputStream.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
-            }
-        }).start();
-
+            }).start();
+        } else {
+            // Display a message indicating that the game is over and cannot be saved
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Game Over");
+            alert.setHeaderText(null);
+            alert.setContentText("The game is over and cannot be saved.");
+            alert.showAndWait();
+        }
     }
+
 
     private void loadGame() {
 
