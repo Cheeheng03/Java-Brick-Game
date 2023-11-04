@@ -60,8 +60,8 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     private long goldTime = 0;
 
     private GameEngine engine;
-    public static String savePath    = "D:/save/save.mdds";
-    public static String savePathDir = "D:/save/";
+    public static String savePath    = "C:/save/save.mdds";
+    public static String savePathDir = "C:/save/";
 
     private ArrayList<Block> blocks = new ArrayList<Block>();
     private ArrayList<Bonus> chocos = new ArrayList<Bonus>();
@@ -127,7 +127,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         heartLabel = new Label("Heart : " + heart);
         heartLabel.setTranslateX(sceneWidth - 70);
         if (loadFromSave == false) {
-            root.getChildren().addAll(rect, ball, scoreLabel, heartLabel, levelLabel, newGame);
+            root.getChildren().addAll(rect, ball, scoreLabel, heartLabel, levelLabel, newGame, load);
         } else {
             root.getChildren().addAll(rect, ball, scoreLabel, heartLabel, levelLabel);
         }
