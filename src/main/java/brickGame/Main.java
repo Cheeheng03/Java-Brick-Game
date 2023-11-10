@@ -30,7 +30,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     private double centerBreakX;
     private double yBreak = 640.0f;
 
-    private int breakWidth     = 130;
+    private int breakWidth     = 500;
     private int breakHeight    = 30;
     private int halfBreakWidth = breakWidth / 2;
 
@@ -43,6 +43,8 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     private Circle ball;
     private double xBall;
     private double yBall;
+    private double xBallPrevious;
+    private double yBallPrevious;
 
     private boolean isGoldStauts      = false;
     private boolean isExistHeartBlock = false;
@@ -428,7 +430,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         }
 
         if (colideToLeftBlock) {
-            goRightBall = true;
+            goRightBall = false;
         }
 
         if (colideToTopBlock) {
@@ -659,7 +661,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
         if (yBall >= Block.getPaddingTop() && yBall <= (Block.getHeight() * (level + 1)) + Block.getPaddingTop()) {
             for (final Block block : blocks) {
-                int hitCode = block.checkHitToBlock(xBall, yBall);
+                int hitCode = block.checkHitToBlock(xBall, yBall, xBallPrevious, yBallPrevious);
                 if (hitCode != Block.NO_HIT) {
                     score += 1;
 
@@ -722,6 +724,10 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     @Override
     public void onPhysicsUpdate() {
         checkDestroyedCount();
+
+        xBallPrevious = xBall;
+        yBallPrevious = yBall;
+
         setPhysicsToBall();
 
 
