@@ -451,19 +451,54 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         if (colideToBottomBlock) {
             goDownBall = true;
         }
+
+
         if (colideToTopLeftBlock) {
-            goDownBall = false;
-            goRightBall = false;
+            if (!goDownBall) {
+                goRightBall = false;
+            }
+            else if (!goRightBall) {
+                goDownBall = false;
+            }
+            else {
+                goDownBall = false;
+                goRightBall = false;
+            }
         } else if (colideToTopRightBlock) {
-            goDownBall = false;
-            goRightBall = true;
+            if (!goDownBall) {
+                goRightBall = true;
+            }
+            else if (goRightBall) {
+                goDownBall = false;
+            }
+            else {
+                goDownBall = false;
+                goRightBall = true;
+            }
         } else if (colideToBottomLeftBlock) {
-            goDownBall = true;
-            goRightBall = false;
+            if (goDownBall) {
+                goRightBall = false;
+            }
+            else if (!goRightBall) {
+                goDownBall = true;
+            }
+            else {
+                goDownBall = true;
+                goRightBall = false;
+            }
         } else if (colideToBottomRightBlock) {
-            goDownBall = true;
-            goRightBall = true;
+            if (goDownBall) {
+                goRightBall = true;
+            }
+            else if (goRightBall) {
+                goDownBall = true;
+            }
+            else {
+                goDownBall = true;
+                goRightBall = true;
+            }
         }
+
 
     }
 
@@ -666,6 +701,9 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
     @Override
     public void onUpdate() {
+        xBallPrevious = xBall;
+        yBallPrevious = yBall;
+
         Platform.runLater(() -> {
             scoreLabel.setText("Score: " + score);
             heartLabel.setText("Heart : " + heart);
@@ -679,6 +717,13 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 choco.choco.setY(choco.y);
             }
         });
+
+        if (yBall >= sceneHeigt) {
+            // Ball hits the bottom, trigger immediate rebound
+            goDownBall = false;
+            setPhysicsToBall();
+            return;
+        }
 
         if (yBall >= Block.getPaddingTop() && yBall <= (Block.getHeight() * (level + 1)) + Block.getPaddingTop()) {
             for (final Block block : blocks) {
@@ -768,9 +813,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     @Override
     public void onPhysicsUpdate() {
         checkDestroyedCount();
-
-        xBallPrevious = xBall;
-        yBallPrevious = yBall;
 
         setPhysicsToBall();
 
