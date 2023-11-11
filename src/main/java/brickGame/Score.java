@@ -1,10 +1,12 @@
 package brickGame;
 
+import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.util.Duration;
 //import sun.plugin2.message.Message;
 
 public class Score {
@@ -25,6 +27,7 @@ public class Score {
                 main.root.getChildren().add(label);
             }
         });
+
 
         new Thread(new Runnable() {
             @Override

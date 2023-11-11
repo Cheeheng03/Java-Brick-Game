@@ -36,6 +36,11 @@ public class Block implements Serializable {
     public static int HIT_LEFT = 2;
     public static int HIT_TOP = 3;
 
+    public static int HIT_TOP_LEFT = 4;
+    public static int HIT_TOP_RIGHT = 5;
+    public static int HIT_BOTTOM_LEFT = 6;
+    public static int HIT_BOTTOM_RIGHT = 7;
+
     public static int BLOCK_NORMAL = 99;
     public static int BLOCK_CHOCO = 100;
     public static int BLOCK_STAR = 101;
@@ -52,13 +57,16 @@ public class Block implements Serializable {
     }
 
     private void draw() {
-        x = (column * width) + paddingH;
-        y = (row * height) + paddingTop;
+        int paddingBetweenBlocks = 4; // This value can be changed to whatever suits your needs
+
+        // Adjusted block position with padding
+        x = (column * (width + paddingBetweenBlocks)) + paddingH;
+        y = (row * (height + paddingBetweenBlocks)) + paddingTop;
 
         rect = new Rectangle();
-        rect.setWidth(width);
-        rect.setHeight(height);
-        rect.setX(x);
+        rect.setWidth(width); // Width of the block remains the same
+        rect.setHeight(height); // Height of the block remains the same
+        rect.setX(x); // Set the X position including the horizontal padding
         rect.setY(y);
 
         if (type == BLOCK_CHOCO) {
@@ -80,28 +88,43 @@ public class Block implements Serializable {
     }
 
 
-    public int checkHitToBlock(double xBall, double yBall, double xBallPrevious, double yBallPrevious) {
-        final double Epsilon = 0.00001; // Define an epsilon value for floating point comparison
+    public int checkHitToBlock(double xBall, double yBall, double xBallPrevious, double yBallPrevious, double ballRadius) {
+        final double Epsilon = 0.00001; // Define an epsilon value for floating-point comparison
 
         if (isDestroyed) {
             return NO_HIT;
         }
 
         // Calculate the ball's path as a rectangle for AABB collision detection using epsilon for precision
-        double left = Math.min(xBall, xBallPrevious);
-        double right = Math.max(xBall, xBallPrevious);
-        double top = Math.min(yBall, yBallPrevious);
-        double bottom = Math.max(yBall, yBallPrevious);
+        double left = Math.min(xBall - ballRadius, xBallPrevious - ballRadius);
+        double right = Math.max(xBall + ballRadius, xBallPrevious + ballRadius);
+        double top = Math.min(yBall - ballRadius, yBallPrevious - ballRadius);
+        double bottom = Math.max(yBall + ballRadius, yBallPrevious + ballRadius);
 
         // Adjust the comparison to include epsilon
-        if (right < x - Epsilon || left > x + width + Epsilon || bottom < y - Epsilon || top > y + height + Epsilon) {
+        if (right + Epsilon < x || left - Epsilon > x + width || bottom + Epsilon < y || top - Epsilon > y + height) {
             // No intersection with the block, considering epsilon
             return NO_HIT;
         }
 
+        if (Math.abs(xBall - x) <= ballRadius + Epsilon && Math.abs(yBall - y) <= ballRadius + Epsilon) {
+            System.out.println("Hit Top Left Corner");
+            return HIT_TOP_LEFT;
+        } else if (Math.abs(xBall - (x + width)) <= ballRadius + Epsilon && Math.abs(yBall - y) <= ballRadius + Epsilon) {
+            System.out.println("Hit Top Right Corner");
+            return HIT_TOP_RIGHT;
+        } else if (Math.abs(xBall - x) <= ballRadius + Epsilon && Math.abs(yBall - (y + height)) <= ballRadius + Epsilon) {
+            System.out.println("Hit Bottom Left Corner");
+            return HIT_BOTTOM_LEFT;
+        } else if (Math.abs(xBall - (x + width)) <= ballRadius + Epsilon && Math.abs(yBall - (y + height)) <= ballRadius + Epsilon) {
+            System.out.println("Hit Bottom Right Corner");
+            return HIT_BOTTOM_RIGHT;
+        }
+
         // Further checks with epsilon comparison
-        // Check if the ball's current position intersects with the block's margins considering an epsilon
-        if (xBall >= x - Epsilon && xBall <= x + width + Epsilon && yBall >= y - Epsilon && yBall <= y + height + Epsilon) {
+        // Check if the ball's current position intersects with the block's margins considering epsilon
+        if (xBall + ballRadius + Epsilon >= x && xBall - ballRadius - Epsilon <= x + width &&
+                yBall + ballRadius + Epsilon >= y && yBall - ballRadius - Epsilon <= y + height) {
             // Compute displacements with epsilon in mind to handle edge cases
             double dx = Math.min(Math.abs(xBall - x), Math.abs(xBall - (x + width)));
             double dy = Math.min(Math.abs(yBall - y), Math.abs(yBall - (y + height)));
@@ -125,16 +148,16 @@ public class Block implements Serializable {
             }
         } else {
             // Previous position comparisons considering epsilon to detect edge crossing
-            if (xBallPrevious < x - Epsilon && xBall >= x) {
+            if (xBallPrevious + ballRadius + Epsilon < x && xBall >= x) {
                 System.out.println("HIT LEFT SIDE VIA PREVIOUS");
                 return HIT_LEFT;
-            } else if (xBallPrevious > x + width + Epsilon && xBall <= x + width) {
+            } else if (xBallPrevious - ballRadius - Epsilon > x + width && xBall <= x + width) {
                 System.out.println("HIT RIGHT SIDE VIA PREVIOUS");
                 return HIT_RIGHT;
-            } else if (yBallPrevious < y - Epsilon && yBall >= y) {
+            } else if (yBallPrevious + ballRadius + Epsilon < y && yBall >= y) {
                 System.out.println("HIT TOP SIDE VIA PREVIOUS");
                 return HIT_TOP;
-            } else if (yBallPrevious > y + height + Epsilon && yBall <= y + height) {
+            } else if (yBallPrevious - ballRadius - Epsilon > y + height && yBall <= y + height) {
                 System.out.println("HIT BOTTOM SIDE VIA PREVIOUS");
                 return HIT_BOTTOM;
             }
@@ -142,6 +165,7 @@ public class Block implements Serializable {
 
         return NO_HIT; // If none of the conditions met, there is no hit
     }
+
 
 
     public static int getPaddingTop() {

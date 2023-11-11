@@ -18,8 +18,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Random;
+import java.util.*;
 
 public class Main extends Application implements EventHandler<KeyEvent>, GameEngine.OnAction {
 
@@ -52,8 +51,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     private Rectangle rect;
     private int       ballRadius = 10;
 
-    private int destroyedBlockCount = 0;
-
     private double v = 1.000;
 
     private int  heart    = 3;
@@ -61,6 +58,8 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     private long time     = 0;
     private long hitTime  = 0;
     private long goldTime = 0;
+    private int initialBlockCount;
+    private int destroyedBlockCount = 0;
 
     private GameEngine engine;
     public static String savePath    = "C:/save/save.mdds";
@@ -99,7 +98,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         this.primaryStage = primaryStage;
 
 
-        if (loadFromSave == false) {
+        if (!loadFromSave) {
             level++;
             if (level >1){
                 new Score().showMessage("Level Up :)", this);
@@ -112,6 +111,8 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             initBall();
             initBreak();
             initBoard();
+
+            initialBlockCount = blocks.size();
 
             load = new Button("Load Game");
             newGame = new Button("Start New Game");
@@ -145,7 +146,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         primaryStage.setScene(scene);
         primaryStage.show();
 
-        if (loadFromSave == false) {
+        if (!loadFromSave) {
             if (level > 1 && level < 18) {
                 load.setVisible(false);
                 newGame.setVisible(false);
@@ -189,6 +190,8 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     }
 
     private void initBoard() {
+
+
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < level + 1; j++) {
                 int r = new Random().nextInt(500);
@@ -279,9 +282,9 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     private void initBall() {
         Random random = new Random();
         xBall = random.nextInt(sceneWidth) + 1;
-        yBall = random.nextInt(sceneHeigt - 200) + ((level + 1) * Block.getHeight()) + 15;
-        ball = new Circle();
-        ball.setRadius(ballRadius);
+        //yBall = random.nextInt(sceneHeigt - 200) + ((level + 1) * Block.getHeight()) + 15;
+        yBall = sceneHeigt / 2.0;
+        ball = new Circle(xBall, yBall, ballRadius);
         ball.setFill(new ImagePattern(new Image("ball.png")));
     }
 
@@ -308,6 +311,10 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     private boolean colideToBottomBlock         = false;
     private boolean colideToLeftBlock           = false;
     private boolean colideToTopBlock            = false;
+    private boolean colideToTopLeftBlock        = false;
+    private boolean colideToTopRightBlock       = false;
+    private boolean colideToBottomLeftBlock     = false;
+    private boolean colideToBottomRightBlock    = false;
 
     private double vX = 1.000;
     private double vY = 1.000;
@@ -324,10 +331,14 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         colideToBottomBlock = false;
         colideToLeftBlock = false;
         colideToTopBlock = false;
+
+        colideToTopLeftBlock = false;
+        colideToTopRightBlock = false;
+        colideToBottomLeftBlock = false;
+        colideToBottomRightBlock = false;
     }
 
     private void setPhysicsToBall() {
-        //v = ((time - hitTime) / 1000.000) + 1.000;
 
         if (goDownBall) {
             yBall += vY;
@@ -440,13 +451,25 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         if (colideToBottomBlock) {
             goDownBall = true;
         }
-
+        if (colideToTopLeftBlock) {
+            goDownBall = false;
+            goRightBall = false;
+        } else if (colideToTopRightBlock) {
+            goDownBall = false;
+            goRightBall = true;
+        } else if (colideToBottomLeftBlock) {
+            goDownBall = true;
+            goRightBall = false;
+        } else if (colideToBottomRightBlock) {
+            goDownBall = true;
+            goRightBall = true;
+        }
 
     }
 
 
     private void checkDestroyedCount() {
-        if (destroyedBlockCount == blocks.size()) {
+        if (destroyedBlockCount == initialBlockCount) {
             //TODO win level todo...
             //System.out.println("You Win");
 
@@ -638,82 +661,103 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     }
 
 
+    // Class member to queue the blocks that need to be removed
+    private Queue<Block> blocksToRemove = new LinkedList<>();
+
     @Override
     public void onUpdate() {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
+        Platform.runLater(() -> {
+            scoreLabel.setText("Score: " + score);
+            heartLabel.setText("Heart : " + heart);
 
-                scoreLabel.setText("Score: " + score);
-                heartLabel.setText("Heart : " + heart);
+            rect.setX(xBreak);
+            rect.setY(yBreak);
+            ball.setCenterX(xBall);
+            ball.setCenterY(yBall);
 
-                rect.setX(xBreak);
-                rect.setY(yBreak);
-                ball.setCenterX(xBall);
-                ball.setCenterY(yBall);
-
-                for (Bonus choco : chocos) {
-                    choco.choco.setY(choco.y);
-                }
+            for (Bonus choco : chocos) {
+                choco.choco.setY(choco.y);
             }
         });
 
-
         if (yBall >= Block.getPaddingTop() && yBall <= (Block.getHeight() * (level + 1)) + Block.getPaddingTop()) {
             for (final Block block : blocks) {
-                int hitCode = block.checkHitToBlock(xBall, yBall, xBallPrevious, yBallPrevious);
+                int hitCode = block.checkHitToBlock(xBall, yBall, xBallPrevious, yBallPrevious, ballRadius);
                 if (hitCode != Block.NO_HIT) {
                     score += 1;
-
                     new Score().show(block.x, block.y, 1, this);
+                    block.isDestroyed = true; // Mark the block as destroyed
+                    blocksToRemove.add(block); // Queue the block for removal
 
-                    block.rect.setVisible(false);
-                    block.isDestroyed = true;
-                    destroyedBlockCount++;
-                    //System.out.println("size is " + blocks.size());
-                    resetColideFlags();
+                    // Handle special blocks
+                    handleSpecialBlock(block);
 
-                    if (block.type == Block.BLOCK_CHOCO) {
-                        final Bonus choco = new Bonus(block.row, block.column);
-                        choco.timeCreated = time;
-                        Platform.runLater(new Runnable() {
-                            @Override
-                            public void run() {
-                                root.getChildren().add(choco.choco);
-                            }
-                        });
-                        chocos.add(choco);
-                    }
+                    // Collision flags are reset outside the loop to prevent concurrent modification
+                    setCollisionFlags(hitCode);
 
-                    if (block.type == Block.BLOCK_STAR) {
-                        goldTime = time;
-                        ball.setFill(new ImagePattern(new Image("goldball.png")));
-                        System.out.println("gold ball");
-                        root.getStyleClass().add("goldRoot");
-                        isGoldStauts = true;
-                    }
-
-                    if (block.type == Block.BLOCK_HEART) {
-                        heart++;
-                    }
-
-                    if (hitCode == Block.HIT_RIGHT) {
-                        colideToRightBlock = true;
-                    } else if (hitCode == Block.HIT_BOTTOM) {
-                        colideToBottomBlock = true;
-                    } else if (hitCode == Block.HIT_LEFT) {
-                        colideToLeftBlock = true;
-                    } else if (hitCode == Block.HIT_TOP) {
-                        colideToTopBlock = true;
-                    }
-
+                    System.out.println("Destroyed Blocks: " + destroyedBlockCount);
+                    System.out.println("Initial Blocks: " + initialBlockCount);
                 }
+            }
+        }
 
-                //TODO hit to break and some work here....
-                //System.out.println("Break in row:" + block.row + " and column:" + block.column + " hit");
+        // Remove the blocks queued for removal outside the loop
+        removeDestroyedBlocks();
+        checkDestroyedCount();
+    }
+
+    private void handleSpecialBlock(final Block block) {
+        if (block.type == Block.BLOCK_CHOCO) {
+            final Bonus choco = new Bonus(block.row, block.column);
+            choco.timeCreated = time;
+            Platform.runLater(() -> root.getChildren().add(choco.choco));
+            chocos.add(choco);
+        } else if (block.type == Block.BLOCK_STAR) {
+            goldTime = time;
+            Platform.runLater(() -> {
+                ball.setFill(new ImagePattern(new Image("goldball.png")));
+                root.getStyleClass().add("goldRoot");
+            });
+            isGoldStauts = true;
+        } else if (block.type == Block.BLOCK_HEART) {
+            heart++;
+        }
+    }
+
+    private void setCollisionFlags(int hitCode) {
+        if (hitCode == Block.HIT_RIGHT) {
+            colideToRightBlock = true;
+        } else if (hitCode == Block.HIT_BOTTOM) {
+            colideToBottomBlock = true;
+        } else if (hitCode == Block.HIT_LEFT) {
+            colideToLeftBlock = true;
+        } else if (hitCode == Block.HIT_TOP) {
+            colideToTopBlock = true;
+        } else if (hitCode == Block.HIT_TOP_LEFT) {
+            colideToTopLeftBlock = true;
+        } else if (hitCode == Block.HIT_TOP_RIGHT) {
+            colideToTopRightBlock = true;
+        } else if (hitCode == Block.HIT_BOTTOM_LEFT) {
+            colideToBottomLeftBlock = true;
+        } else if (hitCode == Block.HIT_BOTTOM_RIGHT) {
+            colideToBottomRightBlock = true;
+        }
+    }
+
+    private void removeDestroyedBlocks() {
+        Iterator<Block> iterator = blocks.iterator();
+        while (iterator.hasNext()) {
+            Block block = iterator.next();
+            if (blocksToRemove.contains(block)) {
+                iterator.remove();  // Safe removal using iterator
+                Platform.runLater(() -> block.rect.setVisible(false));
+                destroyedBlockCount++;
             }
         }
     }
+
+
+
 
 
     @Override
