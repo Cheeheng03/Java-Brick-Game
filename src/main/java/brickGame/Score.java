@@ -1,6 +1,8 @@
 package brickGame;
 
-import javafx.animation.FadeTransition;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -11,69 +13,59 @@ import javafx.util.Duration;
 
 public class Score {
     public void show(final double x, final double y, int score, final Main main) {
-        String sign;
-        if (score >= 0) {
-            sign = "+";
-        } else {
-            sign = "";
-        }
+        String sign = score >= 0 ? "+" : "";
         final Label label = new Label(sign + score);
         label.setTranslateX(x);
         label.setTranslateY(y);
 
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                main.root.getChildren().add(label);
-            }
-        });
+        Platform.runLater(() -> main.root.getChildren().add(label));
 
+        Timeline timeline = new Timeline();
+        KeyValue scaleUpX = new KeyValue(label.scaleXProperty(), 2);
+        KeyValue scaleUpY = new KeyValue(label.scaleYProperty(), 2);
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                for (int i = 0; i < 21; i++) {
-                    try {
-                        label.setScaleX(i);
-                        label.setScaleY(i);
-                        label.setOpacity((20 - i) / 20.0);
-                        Thread.sleep(15);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }).start();
+        KeyValue fadeOut = new KeyValue(label.opacityProperty(), 0);
+
+        KeyFrame keyFrame1 = new KeyFrame(Duration.millis(315), scaleUpX, scaleUpY);
+        KeyFrame keyFrame2 = new KeyFrame(Duration.seconds(1.5), fadeOut);
+
+        timeline.getKeyFrames().addAll(keyFrame1, keyFrame2);
+        timeline.setOnFinished(event -> Platform.runLater(() -> main.root.getChildren().remove(label)));
+        timeline.play();
     }
+
 
     public void showMessage(String message, final Main main) {
         final Label label = new Label(message);
         label.setTranslateX(220);
         label.setTranslateY(340);
 
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                main.root.getChildren().add(label);
-            }
-        });
+        Platform.runLater(() -> main.root.getChildren().add(label));
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                for (int i = 0; i < 21; i++) {
-                    try {
-                        label.setScaleX(Math.abs(i-10));
-                        label.setScaleY(Math.abs(i-10));
-                        label.setOpacity((20 - i) / 20.0);
-                        Thread.sleep(15);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }).start();
+        Timeline timeline = new Timeline();
+
+        KeyValue startScaleX = new KeyValue(label.scaleXProperty(), 1);
+        KeyValue startScaleY = new KeyValue(label.scaleYProperty(), 1);
+        KeyValue peakScaleX = new KeyValue(label.scaleXProperty(), 2);
+        KeyValue peakScaleY = new KeyValue(label.scaleYProperty(), 2);
+        KeyValue endScaleX = new KeyValue(label.scaleXProperty(), 1);
+        KeyValue endScaleY = new KeyValue(label.scaleYProperty(), 1);
+
+        KeyValue fadeStart = new KeyValue(label.opacityProperty(), 1);
+        KeyValue fadeEnd = new KeyValue(label.opacityProperty(), 0);
+
+        KeyFrame startFrame = new KeyFrame(Duration.ZERO, startScaleX, startScaleY, fadeStart);
+        KeyFrame peakFrame = new KeyFrame(Duration.millis(750), peakScaleX, peakScaleY);
+        KeyFrame endFrame = new KeyFrame(Duration.millis(1500), endScaleX, endScaleY);
+        KeyFrame fadeFrame = new KeyFrame(Duration.seconds(3.5), fadeEnd); // Includes delay as per original method.
+
+        timeline.getKeyFrames().addAll(startFrame, peakFrame, endFrame, fadeFrame);
+
+        timeline.setOnFinished(event -> Platform.runLater(() -> main.root.getChildren().remove(label)));
+
+        timeline.play();
     }
+
 
     public void showGameOver(final Main main) {
         Platform.runLater(new Runnable() {
