@@ -1,5 +1,7 @@
 package brickGame;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -9,6 +11,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -16,6 +19,7 @@ import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.io.*;
 import java.util.*;
@@ -29,7 +33,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     private double centerBreakX;
     private double yBreak = 640.0f;
 
-    private int breakWidth     = 500;
+    private int breakWidth     = 250;
     private int breakHeight    = 30;
     private int halfBreakWidth = breakWidth / 2;
 
@@ -53,7 +57,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
     private double v = 1.000;
 
-    private int  heart    = 3;
+    private int  heart    = 1000000;
     private int  score    = 0;
     private long time     = 0;
     private long hitTime  = 0;
@@ -88,6 +92,8 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     private Label            levelLabel;
 
     private boolean loadFromSave = false;
+
+    private Timeline moveTimeline;
 
     Stage  primaryStage;
     Button load    = null;
@@ -226,64 +232,82 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
     @Override
     public void handle(KeyEvent event) {
-        switch (event.getCode()) {
-            case LEFT:
-                move(LEFT);
-                break;
-            case RIGHT:
-
-                move(RIGHT);
-                break;
-            case DOWN:
-                //setPhysicsToBall();
-                break;
-            case S:
-                saveGame();
-                break;
+        if(event.getCode() == KeyCode.LEFT) {
+            move(LEFT);
+        } else if(event.getCode() == KeyCode.RIGHT) {
+            move(RIGHT);
+        } else if(event.getCode() == KeyCode.DOWN) {
+            //setPhysicsToBall(); // Assuming you have physics method for ball
+        } else if(event.getCode() == KeyCode.S) {
+            saveGame();
         }
     }
 
     float oldXBreak;
 
+//    private void move(final int direction) {
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                int sleepTime = 4;
+//                for (int i = 0; i < 30; i++) {
+//                    if (xBreak == (sceneWidth - breakWidth) && direction == RIGHT) {
+//                        return;
+//                    }
+//                    if (xBreak == 0 && direction == LEFT) {
+//                        return;
+//                    }
+//                    if (direction == RIGHT) {
+//                        xBreak++;
+//                    } else {
+//                        xBreak--;
+//                    }
+//                    centerBreakX = xBreak + halfBreakWidth;
+//                    try {
+//                        Thread.sleep(sleepTime);
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
+//                    if (i >= 20) {
+//                        sleepTime = i;
+//                    }
+//                }
+//            }
+//        }).start();
+//
+//
+//    }
     private void move(final int direction) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                int sleepTime = 4;
-                for (int i = 0; i < 30; i++) {
-                    if (xBreak == (sceneWidth - breakWidth) && direction == RIGHT) {
-                        return;
-                    }
-                    if (xBreak == 0 && direction == LEFT) {
-                        return;
-                    }
-                    if (direction == RIGHT) {
-                        xBreak++;
-                    } else {
-                        xBreak--;
-                    }
-                    centerBreakX = xBreak + halfBreakWidth;
-                    try {
-                        Thread.sleep(sleepTime);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    if (i >= 20) {
-                        sleepTime = i;
-                    }
-                }
+        if (moveTimeline != null) {
+            moveTimeline.stop(); // Stop the previous timeline if it is running
+        }
+        moveTimeline = new Timeline();
+        moveTimeline.setCycleCount(30);
+        KeyFrame moveKeyFrame = new KeyFrame(Duration.millis(4), ae -> {
+            if (xBreak == (sceneWidth - breakWidth) && direction == RIGHT) {
+                return;
             }
-        }).start();
-
-
+            if (xBreak == 0 && direction == LEFT) {
+                return;
+            }
+            if (direction == RIGHT) {
+                xBreak++;
+            } else {
+                xBreak--;
+            }
+            centerBreakX = xBreak + halfBreakWidth;
+        });
+        moveTimeline.getKeyFrames().add(moveKeyFrame);
+        moveTimeline.play();
     }
+
 
 
     private void initBall() {
         Random random = new Random();
         xBall = random.nextInt(sceneWidth) + 1;
-        //yBall = random.nextInt(sceneHeigt - 200) + ((level + 1) * Block.getHeight()) + 15;
-        yBall = sceneHeigt / 2.0;
+        yBall = random.nextInt(sceneHeigt - 200) + ((level + 1) * Block.getHeight()) + 15;
+        //yBall = sceneHeigt / 2.0;
         ball = new Circle(xBall, yBall, ballRadius);
         ball.setFill(new ImagePattern(new Image("ball.png")));
     }
@@ -462,7 +486,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             }
             else {
                 goDownBall = false;
-                goRightBall = false;
             }
         } else if (colideToTopRightBlock) {
             if (!goDownBall) {
@@ -473,7 +496,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             }
             else {
                 goDownBall = false;
-                goRightBall = true;
             }
         } else if (colideToBottomLeftBlock) {
             if (goDownBall) {
@@ -484,7 +506,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             }
             else {
                 goDownBall = true;
-                goRightBall = false;
             }
         } else if (colideToBottomRightBlock) {
             if (goDownBall) {
@@ -495,7 +516,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             }
             else {
                 goDownBall = true;
-                goRightBall = true;
             }
         }
 
@@ -638,61 +658,59 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     }
 
     private void nextLevel() {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    vX = 1.000;
+        Platform.runLater(() -> {
+            try {
+                vX = 1.000;
+                resetColideFlags();
+                goDownBall = true;
+                isGoldStauts = false;
+                isExistHeartBlock = false;
+                hitTime = 0;
+                time = 0;
+                goldTime = 0;
 
-                    engine.stop();
-                    resetColideFlags();
-                    goDownBall = true;
+                engine.stop();
+                blocks.clear();
+                chocos.clear();
+                destroyedBlockCount = 0;
 
-                    isGoldStauts = false;
-                    isExistHeartBlock = false;
-
-
-                    hitTime = 0;
-                    time = 0;
-                    goldTime = 0;
-
-                    engine.stop();
-                    blocks.clear();
-                    chocos.clear();
-                    destroyedBlockCount = 0;
-                    start(primaryStage);
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                start(primaryStage);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         });
+        System.out.println("Current level before increment: " + level);
+        level++;
+        System.out.println("New level after increment: " + level);
+
     }
 
+
     public void restartGame() {
+        Platform.runLater(() -> {
+            try {
+                level = 0;
+                heart = 3;
+                score = 0;
+                vX = 1.000;
+                destroyedBlockCount = 0;
+                resetColideFlags();
+                goDownBall = true;
 
-        try {
-            level = 0;
-            heart = 3;
-            score = 0;
-            vX = 1.000;
-            destroyedBlockCount = 0;
-            resetColideFlags();
-            goDownBall = true;
+                isGoldStauts = false;
+                isExistHeartBlock = false;
+                hitTime = 0;
+                time = 0;
+                goldTime = 0;
 
-            isGoldStauts = false;
-            isExistHeartBlock = false;
-            hitTime = 0;
-            time = 0;
-            goldTime = 0;
+                blocks.clear();
+                chocos.clear();
 
-            blocks.clear();
-            chocos.clear();
-
-            start(primaryStage);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+                start(primaryStage);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
     }
 
 
@@ -740,15 +758,15 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                     // Collision flags are reset outside the loop to prevent concurrent modification
                     setCollisionFlags(hitCode);
 
-                    System.out.println("Destroyed Blocks: " + destroyedBlockCount);
-                    System.out.println("Initial Blocks: " + initialBlockCount);
+//                    System.out.println("Destroyed Blocks: " + destroyedBlockCount);
+//                    System.out.println("Initial Blocks: " + initialBlockCount);
                 }
             }
         }
 
         // Remove the blocks queued for removal outside the loop
         removeDestroyedBlocks();
-        checkDestroyedCount();
+        //checkDestroyedCount();
     }
 
     private void handleSpecialBlock(final Block block) {
