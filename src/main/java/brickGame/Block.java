@@ -57,11 +57,14 @@ public class Block implements Serializable {
     }
 
     private void draw() {
-        int paddingBetweenBlocks = 4; // This value can be changed to whatever suits your needs
+        //int paddingBetweenBlocks = 4; // This value can be changed to whatever suits your needs
 
         // Adjusted block position with padding
-        x = (column * (width + paddingBetweenBlocks)) + paddingH;
-        y = (row * (height + paddingBetweenBlocks)) + paddingTop;
+        //x = (column * (width + paddingBetweenBlocks)) + paddingH;
+        //y = (row * (height + paddingBetweenBlocks)) + paddingTop;
+
+        x = (column * width) + paddingH;
+        y = (row * height) + paddingTop;
 
         rect = new Rectangle();
         rect.setWidth(width); // Width of the block remains the same
@@ -108,16 +111,16 @@ public class Block implements Serializable {
         }
 
         if (Math.abs(xBall - x) <= ballRadius + Epsilon && Math.abs(yBall - y) <= ballRadius + Epsilon) {
-            System.out.println("Hit Top Left Corner");
+            //System.out.println("Hit Top Left Corner");
             return HIT_TOP_LEFT;
         } else if (Math.abs(xBall - (x + width)) <= ballRadius + Epsilon && Math.abs(yBall - y) <= ballRadius + Epsilon) {
-            System.out.println("Hit Top Right Corner");
+            //System.out.println("Hit Top Right Corner");
             return HIT_TOP_RIGHT;
         } else if (Math.abs(xBall - x) <= ballRadius + Epsilon && Math.abs(yBall - (y + height)) <= ballRadius + Epsilon) {
-            System.out.println("Hit Bottom Left Corner");
+            //System.out.println("Hit Bottom Left Corner");
             return HIT_BOTTOM_LEFT;
         } else if (Math.abs(xBall - (x + width)) <= ballRadius + Epsilon && Math.abs(yBall - (y + height)) <= ballRadius + Epsilon) {
-            System.out.println("Hit Bottom Right Corner");
+            //System.out.println("Hit Bottom Right Corner");
             return HIT_BOTTOM_RIGHT;
         }
 
@@ -130,35 +133,35 @@ public class Block implements Serializable {
             double dy = Math.min(Math.abs(yBall - y), Math.abs(yBall - (y + height)));
 
             if (dx + Epsilon < dy) {
-                if (xBall < x + width / 2) {
-                    System.out.println("Hit Left");
+                if (xBall < x + (double) width / 2) {
+                    //System.out.println("Hit Left");
                     return HIT_LEFT;
                 } else {
-                    System.out.println("Hit Right");
+                    //System.out.println("Hit Right");
                     return HIT_RIGHT;
                 }
             } else if (dx > dy + Epsilon) {
-                if (yBall < y + height / 2) {
-                    System.out.println("Hit Top");
+                if (yBall < y + (double) height / 2) {
+                   // System.out.println("Hit Top");
                     return HIT_TOP;
                 } else {
-                    System.out.println("Hit Bottom");
+                    //System.out.println("Hit Bottom");
                     return HIT_BOTTOM;
                 }
             }
         } else {
             // Previous position comparisons considering epsilon to detect edge crossing
             if (xBallPrevious + ballRadius + Epsilon < x && xBall >= x) {
-                System.out.println("HIT LEFT SIDE VIA PREVIOUS");
+                //System.out.println("HIT LEFT SIDE VIA PREVIOUS");
                 return HIT_LEFT;
             } else if (xBallPrevious - ballRadius - Epsilon > x + width && xBall <= x + width) {
-                System.out.println("HIT RIGHT SIDE VIA PREVIOUS");
+                //System.out.println("HIT RIGHT SIDE VIA PREVIOUS");
                 return HIT_RIGHT;
             } else if (yBallPrevious + ballRadius + Epsilon < y && yBall >= y) {
-                System.out.println("HIT TOP SIDE VIA PREVIOUS");
+                //System.out.println("HIT TOP SIDE VIA PREVIOUS");
                 return HIT_TOP;
             } else if (yBallPrevious - ballRadius - Epsilon > y + height && yBall <= y + height) {
-                System.out.println("HIT BOTTOM SIDE VIA PREVIOUS");
+               // System.out.println("HIT BOTTOM SIDE VIA PREVIOUS");
                 return HIT_BOTTOM;
             }
         }

@@ -33,7 +33,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     private double centerBreakX;
     private double yBreak = 640.0f;
 
-    private int breakWidth     = 250;
+    private int breakWidth     = 130;
     private int breakHeight    = 30;
     private int halfBreakWidth = breakWidth / 2;
 
@@ -57,7 +57,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
     private double v = 1.000;
 
-    private int  heart    = 1000000;
+    private int  heart    = 3;
     private int  score    = 0;
     private long time     = 0;
     private long hitTime  = 0;
@@ -71,6 +71,11 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
     private ArrayList<Block> blocks = new ArrayList<Block>();
     private ArrayList<Bonus> chocos = new ArrayList<Bonus>();
+
+    public enum GameState {
+        RUNNING,
+        NEXT_LEVEL_TRANSITION // Adding a state for transitioning to the next level
+    }
     private Color[]          colors = new Color[]{
             Color.MAGENTA,
             Color.RED,
@@ -92,6 +97,8 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     private Label            levelLabel;
 
     private boolean loadFromSave = false;
+    private Queue<Block> blocksToRemove = new LinkedList<>();
+    private boolean readyForNextLevel = false;
 
     private Timeline moveTimeline;
 
@@ -135,7 +142,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         levelLabel = new Label("Level: " + level);
         levelLabel.setTranslateY(20);
         heartLabel = new Label("Heart : " + heart);
-        heartLabel.setTranslateX(sceneWidth - 70);
+        heartLabel.setTranslateX(sceneWidth - 75);
         if (loadFromSave == false) {
             root.getChildren().addAll(rect, ball, scoreLabel, heartLabel, levelLabel, newGame, load);
         } else {
@@ -243,63 +250,39 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         }
     }
 
-    float oldXBreak;
-
-//    private void move(final int direction) {
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                int sleepTime = 4;
-//                for (int i = 0; i < 30; i++) {
-//                    if (xBreak == (sceneWidth - breakWidth) && direction == RIGHT) {
-//                        return;
-//                    }
-//                    if (xBreak == 0 && direction == LEFT) {
-//                        return;
-//                    }
-//                    if (direction == RIGHT) {
-//                        xBreak++;
-//                    } else {
-//                        xBreak--;
-//                    }
-//                    centerBreakX = xBreak + halfBreakWidth;
-//                    try {
-//                        Thread.sleep(sleepTime);
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
-//                    if (i >= 20) {
-//                        sleepTime = i;
-//                    }
-//                }
-//            }
-//        }).start();
-//
-//
-//    }
     private void move(final int direction) {
-        if (moveTimeline != null) {
-            moveTimeline.stop(); // Stop the previous timeline if it is running
-        }
-        moveTimeline = new Timeline();
-        moveTimeline.setCycleCount(30);
-        KeyFrame moveKeyFrame = new KeyFrame(Duration.millis(4), ae -> {
-            if (xBreak == (sceneWidth - breakWidth) && direction == RIGHT) {
-                return;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                int sleepTime = 4;
+                for (int i = 0; i < 30; i++) {
+                    if (xBreak == (sceneWidth - breakWidth) && direction == RIGHT) {
+                        return;
+                    }
+                    if (xBreak == 0 && direction == LEFT) {
+                        return;
+                    }
+                    if (direction == RIGHT) {
+                        xBreak++;
+                    } else {
+                        xBreak--;
+                    }
+                    centerBreakX = xBreak + halfBreakWidth;
+                    try {
+                        Thread.sleep(sleepTime);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    if (i >= 20) {
+                        sleepTime = i;
+                    }
+                }
             }
-            if (xBreak == 0 && direction == LEFT) {
-                return;
-            }
-            if (direction == RIGHT) {
-                xBreak++;
-            } else {
-                xBreak--;
-            }
-            centerBreakX = xBreak + halfBreakWidth;
-        });
-        moveTimeline.getKeyFrames().add(moveKeyFrame);
-        moveTimeline.play();
+        }).start();
+
+
     }
+
 
 
 
@@ -522,12 +505,10 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
     }
 
-
+    private GameState currentState = GameState.RUNNING;
     private void checkDestroyedCount() {
-        if (destroyedBlockCount == initialBlockCount) {
-            //TODO win level todo...
-            //System.out.println("You Win");
-
+        if (destroyedBlockCount == initialBlockCount && currentState == GameState.RUNNING) {
+            currentState = GameState.NEXT_LEVEL_TRANSITION;
             nextLevel();
         }
     }
@@ -606,7 +587,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         }
     }
 
-
     private void loadGame() {
 
         LoadSave loadSave = new LoadSave();
@@ -657,6 +637,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
     }
 
+
     private void nextLevel() {
         Platform.runLater(() -> {
             try {
@@ -677,12 +658,12 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 start(primaryStage);
             } catch (Exception e) {
                 e.printStackTrace();
+            } finally {
+                // Only reset to RUNNING state after all next level setup is done.
+                currentState = GameState.RUNNING;
             }
         });
-        System.out.println("Current level before increment: " + level);
-        level++;
-        System.out.println("New level after increment: " + level);
-
+        readyForNextLevel = false;
     }
 
 
@@ -712,10 +693,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             }
         });
     }
-
-
-    // Class member to queue the blocks that need to be removed
-    private Queue<Block> blocksToRemove = new LinkedList<>();
 
     @Override
     public void onUpdate() {
@@ -749,24 +726,17 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 if (hitCode != Block.NO_HIT) {
                     score += 1;
                     new Score().show(block.x, block.y, 1, this);
-                    block.isDestroyed = true; // Mark the block as destroyed
-                    blocksToRemove.add(block); // Queue the block for removal
+                    block.isDestroyed = true;
+                    blocksToRemove.add(block);
 
-                    // Handle special blocks
                     handleSpecialBlock(block);
 
-                    // Collision flags are reset outside the loop to prevent concurrent modification
                     setCollisionFlags(hitCode);
-
-//                    System.out.println("Destroyed Blocks: " + destroyedBlockCount);
-//                    System.out.println("Initial Blocks: " + initialBlockCount);
+                    setPhysicsToBall();
                 }
             }
         }
-
-        // Remove the blocks queued for removal outside the loop
         removeDestroyedBlocks();
-        //checkDestroyedCount();
     }
 
     private void handleSpecialBlock(final Block block) {
@@ -789,20 +759,28 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
     private void setCollisionFlags(int hitCode) {
         if (hitCode == Block.HIT_RIGHT) {
+            System.out.println("Hit right");
             colideToRightBlock = true;
         } else if (hitCode == Block.HIT_BOTTOM) {
+            System.out.println("Hit bottom");
             colideToBottomBlock = true;
         } else if (hitCode == Block.HIT_LEFT) {
+            System.out.println("Hit Left");
             colideToLeftBlock = true;
         } else if (hitCode == Block.HIT_TOP) {
+            System.out.println("Hit top");
             colideToTopBlock = true;
         } else if (hitCode == Block.HIT_TOP_LEFT) {
+            System.out.println("Hit top left");
             colideToTopLeftBlock = true;
         } else if (hitCode == Block.HIT_TOP_RIGHT) {
+            System.out.println("Hit top right");
             colideToTopRightBlock = true;
         } else if (hitCode == Block.HIT_BOTTOM_LEFT) {
+            System.out.println("Hit bottom left");
             colideToBottomLeftBlock = true;
         } else if (hitCode == Block.HIT_BOTTOM_RIGHT) {
+            System.out.println("Hit bottom right");
             colideToBottomRightBlock = true;
         }
     }
@@ -818,10 +796,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             }
         }
     }
-
-
-
-
 
     @Override
     public void onInit() {
