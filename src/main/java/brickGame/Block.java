@@ -7,9 +7,10 @@ import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
 
 import java.io.Serializable;
+import java.util.Random;
 
 public class Block implements Serializable {
-    private static Block block = new Block(-1, -1, Color.TRANSPARENT, 99);
+    private static Block block = new Block(-1, -1, 99);
 
     public int row;
     public int column;
@@ -47,10 +48,9 @@ public class Block implements Serializable {
     public static int BLOCK_HEART = 102;
 
 
-    public Block(int row, int column, Color color, int type) {
+    public Block(int row, int column, int type) {
         this.row = row;
         this.column = column;
-        this.color = color;
         this.type = type;
 
         draw();
@@ -59,9 +59,6 @@ public class Block implements Serializable {
     private void draw() {
         //int paddingBetweenBlocks = 4; // This value can be changed to whatever suits your needs
 
-        // Adjusted block position with padding
-        //x = (column * (width + paddingBetweenBlocks)) + paddingH;
-        //y = (row * (height + paddingBetweenBlocks)) + paddingTop;
 
         x = (column * width) + paddingH;
         y = (row * height) + paddingTop;
@@ -85,7 +82,11 @@ public class Block implements Serializable {
             ImagePattern pattern = new ImagePattern(image);
             rect.setFill(pattern);
         } else {
-            rect.setFill(color);
+            int imageIndex = new Random().nextInt(3);
+            String imageName = "brick" + (imageIndex + 1) + ".jpg";
+            Image image = new Image(imageName);
+            ImagePattern pattern = new ImagePattern(image);
+            rect.setFill(pattern);
         }
 
     }

@@ -26,7 +26,6 @@ import java.util.*;
 
 public class Main extends Application implements EventHandler<KeyEvent>, GameEngine.OnAction {
 
-
     private int level = 0;
 
     private double xBreak = 0.0f;
@@ -57,7 +56,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
     private double v = 1.000;
 
-    private int  heart    = 3;
+    private int  heart    = 1000000;
     private int  score    = 0;
     private long time     = 0;
     private long hitTime  = 0;
@@ -138,6 +137,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
 
         root = new Pane();
+        root.getStyleClass().add("bgImageRoot");
         scoreLabel = new Label("Score: " + score);
         levelLabel = new Label("Level: " + level);
         levelLabel.setTranslateY(20);
@@ -226,7 +226,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 } else {
                     type = Block.BLOCK_NORMAL;
                 }
-                blocks.add(new Block(j, i, colors[r % (colors.length)], type));
+                blocks.add(new Block(j, i, type));
                 //System.out.println("colors " + r % (colors.length));
             }
         }
@@ -284,14 +284,24 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     }
 
 
-
-
     private void initBall() {
         Random random = new Random();
         xBall = random.nextInt(sceneWidth) + 1;
-        yBall = random.nextInt(sceneHeigt - 200) + ((level + 1) * Block.getHeight()) + 15;
-        //yBall = sceneHeigt / 2.0;
-        ball = new Circle(xBall, yBall, ballRadius);
+
+        int blocksBottomY = (int) ((level + 1) * Block.getHeight() + Block.getPaddingTop());
+        int paddleTopY = (int) yBreak;
+
+        int ballMinY = blocksBottomY + ballRadius;
+        int ballMaxY = paddleTopY - ballRadius;
+
+        if (ballMinY < ballMaxY) {
+            yBall = random.nextInt(ballMaxY - ballMinY) + ballMinY;
+        } else {
+            yBall = ballMinY;
+        }
+
+        ball = new Circle();
+        ball.setRadius(ballRadius);
         ball.setFill(new ImagePattern(new Image("ball.png")));
     }
 
@@ -366,6 +376,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             return;
         }
         if (yBall >= sceneHeigt) {
+            resetColideFlags();
             goDownBall = false;
             if (!isGoldStauts) {
                 //TODO gameover
@@ -623,7 +634,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
         for (BlockSerializable ser : loadSave.blocks) {
             int r = new Random().nextInt(200);
-            blocks.add(new Block(ser.row, ser.j, colors[r % colors.length], ser.type));
+            blocks.add(new Block(ser.row, ser.j, ser.type));
         }
 
 
@@ -639,6 +650,11 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
 
     private void nextLevel() {
+        if (currentState != GameState.NEXT_LEVEL_TRANSITION) {
+            System.err.println("nextLevel called but not in NEXT_LEVEL_TRANSITION state.");
+            return;
+        }
+
         Platform.runLater(() -> {
             try {
                 vX = 1.000;
@@ -696,6 +712,11 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
     @Override
     public void onUpdate() {
+        if (readyForNextLevel) {
+            System.out.println("Skip");
+            return;
+
+        }
         xBallPrevious = xBall;
         yBallPrevious = yBall;
 
@@ -749,6 +770,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             goldTime = time;
             Platform.runLater(() -> {
                 ball.setFill(new ImagePattern(new Image("goldball.png")));
+                root.getStyleClass().remove("bgImageRoot");
                 root.getStyleClass().add("goldRoot");
             });
             isGoldStauts = true;
@@ -808,10 +830,24 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
         setPhysicsToBall();
 
+        if (isGoldStauts && !root.getStyleClass().contains("goldRoot")) {
+            Platform.runLater(() -> {
+                root.getStyleClass().remove("bgImageRoot");
+                root.getStyleClass().add("goldRoot");
+            });
+        }
+
+        // If the gold status effect has ended, but the background is still gold, set it back to the default.
+        if (time - goldTime > 5000 && root.getStyleClass().contains("goldRoot")) {
+            Platform.runLater(() -> {
+                root.getStyleClass().remove("goldRoot");
+                root.getStyleClass().add("bgImageRoot");
+                isGoldStauts = false; // Make sure to reset the gold status
+            });
+        }
 
         if (time - goldTime > 5000) {
             ball.setFill(new ImagePattern(new Image("ball.png")));
-            root.getStyleClass().remove("goldRoot");
             isGoldStauts = false;
         }
 

@@ -2,6 +2,11 @@
     -fx-background-color: #1d1d1d;
 }
 
+.bgImageRoot{
+    -fx-background-image: url('bg.jpg');
+}
+
+
 .goldRoot {
     -fx-background-color: #4b4a08;
 }
