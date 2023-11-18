@@ -32,16 +32,25 @@ public class Score {
         label.setTranslateX(220);
         label.setTranslateY(340);
 
-        main.root.getChildren().add(label); // This is already running on JavaFX thread due to the calling method context
+        Platform.runLater(() -> main.root.getChildren().add(label));
 
-        Timeline timeline = new Timeline(new KeyFrame(Duration.ZERO,
-                new KeyValue(label.scaleXProperty(), 1),
-                new KeyValue(label.scaleYProperty(), 1),
-                new KeyValue(label.opacityProperty(), 1)),
-                new KeyFrame(Duration.millis(750), new KeyValue(label.scaleXProperty(), 2), new KeyValue(label.scaleYProperty(), 2)),
-                new KeyFrame(Duration.millis(1500), new KeyValue(label.scaleXProperty(), 1), new KeyValue(label.scaleYProperty(), 1)),
-                new KeyFrame(Duration.seconds(3.5), e -> main.root.getChildren().remove(label), new KeyValue(label.opacityProperty(), 0))
+        Timeline timeline = new Timeline();
+        timeline.getKeyFrames().addAll(
+                new KeyFrame(Duration.ZERO,
+                        new KeyValue(label.scaleXProperty(), 1),
+                        new KeyValue(label.scaleYProperty(), 1),
+                        new KeyValue(label.opacityProperty(), 1)),
+                new KeyFrame(Duration.millis(750),
+                        new KeyValue(label.scaleXProperty(), 2),
+                        new KeyValue(label.scaleYProperty(), 2)),
+                new KeyFrame(Duration.millis(1500),
+                        new KeyValue(label.scaleXProperty(), 1),
+                        new KeyValue(label.scaleYProperty(), 1)),
+                new KeyFrame(Duration.seconds(3.5),
+                        new KeyValue(label.opacityProperty(), 0))
         );
+
+        timeline.setOnFinished(e -> main.root.getChildren().remove(label));
         timeline.play();
     }
 

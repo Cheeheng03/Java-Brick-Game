@@ -16,6 +16,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
@@ -122,14 +123,22 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 return;
             }
 
+            if (level == 1) {
+                load.setVisible(true);
+                newGame.setVisible(true);
+            } else {
+                load.setVisible(false);
+                newGame.setVisible(false);
+            }
+
             initBall();
             initBreak();
             initBoard();
 
             initialBlockCount = blocks.size();
-
         }
     }
+
 
     private Pane createRootPane() {
         Pane root = new Pane();
@@ -316,16 +325,18 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
 
     private void initBreak() {
-        rect = new Rectangle();
-        rect.setWidth(breakWidth);
-        rect.setHeight(breakHeight);
-        rect.setX(xBreak);
-        rect.setY(yBreak);
-
-        ImagePattern pattern = new ImagePattern(new Image("block.jpg"));
-
-        rect.setFill(pattern);
+        rect = createBreakRectangle();
+        rect.setFill(createBreakFill());
     }
+
+    private Rectangle createBreakRectangle() {
+        return new Rectangle(xBreak, yBreak, breakWidth, breakHeight);
+    }
+
+    private Paint createBreakFill() {
+        return new ImagePattern(new Image("block.jpg"));
+    }
+
 
 
     private boolean goDownBall                  = true;
