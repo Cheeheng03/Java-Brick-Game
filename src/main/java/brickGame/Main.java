@@ -110,7 +110,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         }
     }
 
-
     private void initializeGameElements() {
         if (!loadFromSave) {
             level++;
@@ -207,34 +206,43 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
 
     private void initBoard() {
-
+        Random random = new Random();
 
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < level + 1; j++) {
-                int r = new Random().nextInt(500);
-                if (r % 5 == 0) {
+                int randomNumber = random.nextInt(500);
+
+                if (randomNumber % 5 == 0) {
                     continue;
                 }
-                int type;
-                if (r % 10 == 1) {
-                    type = Block.BLOCK_CHOCO;
-                } else if (r % 10 == 2) {
-                    if (!isExistHeartBlock) {
-                        type = Block.BLOCK_HEART;
-                        isExistHeartBlock = true;
-                    } else {
-                        type = Block.BLOCK_NORMAL;
-                    }
-                } else if (r % 10 == 3) {
-                    type = Block.BLOCK_STAR;
-                } else {
-                    type = Block.BLOCK_NORMAL;
-                }
+
+                int type = determineBlockType(randomNumber);
                 blocks.add(new Block(j, i, type));
-                //System.out.println("colors " + r % (colors.length));
             }
         }
     }
+
+    private int determineBlockType(int randomNumber) {
+        if (randomNumber % 10 == 1) {
+            return Block.BLOCK_CHOCO;
+        } else if (randomNumber % 10 == 2) {
+            return determineHeartBlockType();
+        } else if (randomNumber % 10 == 3) {
+            return Block.BLOCK_STAR;
+        } else {
+            return Block.BLOCK_NORMAL;
+        }
+    }
+
+    private int determineHeartBlockType() {
+        if (!isExistHeartBlock) {
+            isExistHeartBlock = true;
+            return Block.BLOCK_HEART;
+        } else {
+            return Block.BLOCK_NORMAL;
+        }
+    }
+
 
 
     public static void main(String[] args) {
