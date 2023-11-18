@@ -243,8 +243,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         }
     }
 
-
-
     public static void main(String[] args) {
         launch(args);
     }
@@ -298,6 +296,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
     private void initBall() {
         Random random = new Random();
+
         xBall = random.nextInt(sceneWidth) + 1;
 
         int blocksBottomY = (int) ((level + 1) * Block.getHeight() + Block.getPaddingTop());
@@ -306,16 +305,15 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         int ballMinY = blocksBottomY + ballRadius;
         int ballMaxY = paddleTopY - ballRadius;
 
-        if (ballMinY < ballMaxY) {
-            yBall = random.nextInt(ballMaxY - ballMinY) + ballMinY;
-        } else {
-            yBall = ballMinY;
-        }
+        yBall = (ballMinY < ballMaxY) ? random.nextInt(ballMaxY - ballMinY) + ballMinY : ballMinY;
 
-        ball = new Circle();
-        ball.setRadius(ballRadius);
-        ball.setFill(new ImagePattern(new Image("ball.png")));
+        createBall();
     }
+
+    private void createBall() {
+        ball = new Circle(xBall, yBall, ballRadius, new ImagePattern(new Image("ball.png")));
+    }
+
 
     private void initBreak() {
         rect = new Rectangle();
