@@ -75,21 +75,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         RUNNING,
         NEXT_LEVEL_TRANSITION // Adding a state for transitioning to the next level
     }
-    private Color[]          colors = new Color[]{
-            Color.MAGENTA,
-            Color.RED,
-            Color.GOLD,
-            Color.CORAL,
-            Color.AQUA,
-            Color.VIOLET,
-            Color.GREENYELLOW,
-            Color.ORANGE,
-            Color.PINK,
-            Color.SLATEGREY,
-            Color.YELLOW,
-            Color.TOMATO,
-            Color.TAN,
-    };
     public  Pane             root;
     private Label            scoreLabel;
     private Label            heartLabel;
@@ -769,7 +754,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         } else if (block.type == Block.BLOCK_STAR) {
             goldTime = time;
             Platform.runLater(() -> {
-                ball.setFill(new ImagePattern(new Image("goldball.png")));
+                ball.setFill(new ImagePattern(new Image("goldball.jpeg")));
                 root.getStyleClass().remove("bgImageRoot");
                 root.getStyleClass().add("goldRoot");
             });
@@ -830,24 +815,11 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
         setPhysicsToBall();
 
-        if (isGoldStauts && !root.getStyleClass().contains("goldRoot")) {
-            Platform.runLater(() -> {
-                root.getStyleClass().remove("bgImageRoot");
-                root.getStyleClass().add("goldRoot");
-            });
-        }
-
-        // If the gold status effect has ended, but the background is still gold, set it back to the default.
-        if (time - goldTime > 5000 && root.getStyleClass().contains("goldRoot")) {
-            Platform.runLater(() -> {
-                root.getStyleClass().remove("goldRoot");
-                root.getStyleClass().add("bgImageRoot");
-                isGoldStauts = false; // Make sure to reset the gold status
-            });
-        }
 
         if (time - goldTime > 5000) {
             ball.setFill(new ImagePattern(new Image("ball.png")));
+            root.getStyleClass().remove("goldRoot");
+            root.getStyleClass().add("bgImageRoot");
             isGoldStauts = false;
         }
 
