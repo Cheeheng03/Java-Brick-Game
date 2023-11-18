@@ -56,7 +56,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
     private double v = 1.000;
 
-    private int  heart    = 1000000;
+    private int  heart    = 3;
     private int  score    = 0;
     private long time     = 0;
     private long hitTime  = 0;
@@ -73,7 +73,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
     public enum GameState {
         RUNNING,
-        NEXT_LEVEL_TRANSITION // Adding a state for transitioning to the next level
+        NEXT_LEVEL_TRANSITION
     }
     public  Pane             root;
     private Label            scoreLabel;
@@ -94,10 +94,28 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     public void start(Stage primaryStage) throws Exception {
         this.primaryStage = primaryStage;
 
+        createLabelsAndButtons();
+
+        initializeGameElements();
+
+        root = createRootPane();
+
 
         if (!loadFromSave) {
+            initializeGameButtons();
+            setupButtonActions();
+        } else {
+            startGameEngine();
+            loadFromSave = false;
+        }
+    }
+
+
+    private void initializeGameElements() {
+        if (!loadFromSave) {
             level++;
-            if (level >1){
+            levelLabel.setText("Level : " + level);
+            if (level > 1) {
                 new Score().showMessage("Level Up :)", this);
             }
             if (level == 18) {
@@ -111,31 +129,23 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
             initialBlockCount = blocks.size();
 
-            load = new Button("Load Game");
-            newGame = new Button("Start New Game");
-            load.setTranslateX(220);
-            load.setTranslateY(300);
-            newGame.setTranslateX(220);
-            newGame.setTranslateY(340);
-
         }
+    }
 
-
-        root = new Pane();
+    private Pane createRootPane() {
+        Pane root = new Pane();
         root.getStyleClass().add("bgImageRoot");
-        scoreLabel = new Label("Score: " + score);
-        levelLabel = new Label("Level: " + level);
-        levelLabel.setTranslateY(20);
-        heartLabel = new Label("Heart : " + heart);
-        heartLabel.setTranslateX(sceneWidth - 75);
-        if (loadFromSave == false) {
+
+        if (!loadFromSave) {
             root.getChildren().addAll(rect, ball, scoreLabel, heartLabel, levelLabel, newGame, load);
         } else {
             root.getChildren().addAll(rect, ball, scoreLabel, heartLabel, levelLabel);
         }
+
         for (Block block : blocks) {
             root.getChildren().add(block.rect);
         }
+
         Scene scene = new Scene(root, sceneWidth, sceneHeigt);
         scene.getStylesheets().add("style.css");
         scene.setOnKeyPressed(this);
@@ -144,48 +154,57 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         primaryStage.setScene(scene);
         primaryStage.show();
 
-        if (!loadFromSave) {
-            if (level > 1 && level < 18) {
-                load.setVisible(false);
-                newGame.setVisible(false);
-                engine = new GameEngine();
-                engine.setOnAction(this);
-                engine.setFps(120);
-                engine.start();
-            }
+        return root;
+    }
 
-            load.setOnAction(new EventHandler<ActionEvent>() {
-                @Override
-                public void handle(ActionEvent event) {
-                    loadGame();
+    private void createLabelsAndButtons() {
+        scoreLabel = new Label("Score : 0");
+        heartLabel = new Label("Heart : 3");
+        levelLabel = new Label("Level : 1");
 
-                    load.setVisible(false);
-                    newGame.setVisible(false);
-                }
-            });
+        levelLabel.setTranslateY(20);
+        heartLabel.setTranslateX(sceneWidth - 75);
 
-            newGame.setOnAction(new EventHandler<ActionEvent>() {
-                @Override
-                public void handle(ActionEvent event) {
-                    engine = new GameEngine();
-                    engine.setOnAction(Main.this);
-                    engine.setFps(120);
-                    engine.start();
+        load = new Button("Load Game");
+        newGame = new Button("Start New Game");
+        load.setTranslateX(220);
+        load.setTranslateY(300);
+        newGame.setTranslateX(220);
+        newGame.setTranslateY(340);
+    }
+    private void initializeGameButtons() {
+        load.setOnAction(event -> {
+            loadGame();
+            load.setVisible(false);
+            newGame.setVisible(false);
+        });
 
-                    load.setVisible(false);
-                    newGame.setVisible(false);
-                }
-            });
-        } else {
+        newGame.setOnAction(event -> {
             engine = new GameEngine();
-            engine.setOnAction(this);
+            engine.setOnAction(Main.this);
             engine.setFps(120);
             engine.start();
-            loadFromSave = false;
-        }
 
-
+            load.setVisible(false);
+            newGame.setVisible(false);
+        });
     }
+
+    private void setupButtonActions() {
+        if (level > 1 && level < 18) {
+            load.setVisible(false);
+            newGame.setVisible(false);
+            startGameEngine();
+        }
+    }
+
+    private void startGameEngine() {
+        engine = new GameEngine();
+        engine.setOnAction(this);
+        engine.setFps(120);
+        engine.start();
+    }
+
 
     private void initBoard() {
 
@@ -236,37 +255,37 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     }
 
     private void move(final int direction) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                int sleepTime = 4;
-                for (int i = 0; i < 30; i++) {
-                    if (xBreak == (sceneWidth - breakWidth) && direction == RIGHT) {
-                        return;
-                    }
-                    if (xBreak == 0 && direction == LEFT) {
-                        return;
-                    }
-                    if (direction == RIGHT) {
-                        xBreak++;
-                    } else {
-                        xBreak--;
-                    }
-                    centerBreakX = xBreak + halfBreakWidth;
-                    try {
-                        Thread.sleep(sleepTime);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    if (i >= 20) {
-                        sleepTime = i;
-                    }
+        new Thread(() -> {
+            int sleepTime = 4;
+            int maxIterations = 30;
+
+            for (int i = 0; i < maxIterations; i++) {
+                if ((xBreak == 0 && direction == LEFT) || (xBreak == (sceneWidth - breakWidth) && direction == RIGHT)) {
+                    return;
+                }
+
+                if (direction == RIGHT) {
+                    xBreak++;
+                } else {
+                    xBreak--;
+                }
+
+                centerBreakX = xBreak + halfBreakWidth;
+
+                try {
+                    Thread.sleep(sleepTime);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                if (i >= 20) {
+                    sleepTime = i;
                 }
             }
         }).start();
-
-
     }
+
+
 
 
     private void initBall() {
@@ -706,7 +725,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         yBallPrevious = yBall;
 
         Platform.runLater(() -> {
-            scoreLabel.setText("Score: " + score);
+            scoreLabel.setText("Score : " + score);
             heartLabel.setText("Heart : " + heart);
 
             rect.setX(xBreak);
