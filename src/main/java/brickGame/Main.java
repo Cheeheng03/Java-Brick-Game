@@ -377,165 +377,153 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     }
 
     private void setPhysicsToBall() {
-
-        if (goDownBall) {
-            yBall += vY;
-        } else {
-            yBall -= vY;
-        }
-
-        if (goRightBall) {
-            xBall += vX;
-        } else {
-            xBall -= vX;
-        }
-
-        if (yBall <= 0) {
-            //vX = 1.000;
-            resetColideFlags();
-            goDownBall = true;
-            return;
-        }
-        if (yBall >= sceneHeigt) {
-            resetColideFlags();
-            goDownBall = false;
-            if (!isGoldStauts) {
-                //TODO gameover
-                heart--;
-                new Score().show(sceneWidth / 2, sceneHeigt / 2, -1, this);
-
-                if (heart == 0) {
-                    new Score().showGameOver(this);
-                    engine.stop();
-                }
-
-            }
-            //return;
-        }
-
-        if (yBall >= yBreak - ballRadius) {
-            //System.out.println("Colide1");
-            if (xBall >= xBreak && xBall <= xBreak + breakWidth) {
-                hitTime = time;
-                resetColideFlags();
-                colideToBreak = true;
-                goDownBall = false;
-
-                double relation = (xBall - centerBreakX) / (breakWidth / 2);
-
-                if (Math.abs(relation) <= 0.3) {
-                    //vX = 0;
-                    vX = Math.abs(relation);
-                } else if (Math.abs(relation) > 0.3 && Math.abs(relation) <= 0.7) {
-                    vX = (Math.abs(relation) * 1.5) + (level / 3.500);
-                    //System.out.println("vX " + vX);
-                } else {
-                    vX = (Math.abs(relation) * 2) + (level / 3.500);
-                    //System.out.println("vX " + vX);
-                }
-
-                if (xBall - centerBreakX > 0) {
-                    colideToBreakAndMoveToRight = true;
-                } else {
-                    colideToBreakAndMoveToRight = false;
-                }
-                //System.out.println("Colide2");
-            }
-        }
-
-        if (xBall >= sceneWidth) {
-            resetColideFlags();
-            //vX = 1.000;
-            colideToRightWall = true;
-        }
-
-        if (xBall <= 0) {
-            resetColideFlags();
-            //vX = 1.000;
-            colideToLeftWall = true;
-        }
-
-        if (colideToBreak) {
-            if (colideToBreakAndMoveToRight) {
-                goRightBall = true;
-            } else {
-                goRightBall = false;
-            }
-        }
-
-        //Wall Colide
-
-        if (colideToRightWall) {
-            goRightBall = false;
-        }
-
-        if (colideToLeftWall) {
-            goRightBall = true;
-        }
-
-        //Block Colide
-
-        if (colideToRightBlock) {
-            goRightBall = true;
-        }
-
-        if (colideToLeftBlock) {
-            goRightBall = false;
-        }
-
-        if (colideToTopBlock) {
-            goDownBall = false;
-        }
-
-        if (colideToBottomBlock) {
-            goDownBall = true;
-        }
-
-
-        if (colideToTopLeftBlock) {
-            if (!goDownBall) {
-                goRightBall = false;
-            }
-            else if (!goRightBall) {
-                goDownBall = false;
-            }
-            else {
-                goDownBall = false;
-            }
-        } else if (colideToTopRightBlock) {
-            if (!goDownBall) {
-                goRightBall = true;
-            }
-            else if (goRightBall) {
-                goDownBall = false;
-            }
-            else {
-                goDownBall = false;
-            }
-        } else if (colideToBottomLeftBlock) {
-            if (goDownBall) {
-                goRightBall = false;
-            }
-            else if (!goRightBall) {
-                goDownBall = true;
-            }
-            else {
-                goDownBall = true;
-            }
-        } else if (colideToBottomRightBlock) {
-            if (goDownBall) {
-                goRightBall = true;
-            }
-            else if (goRightBall) {
-                goDownBall = true;
-            }
-            else {
-                goDownBall = true;
-            }
-        }
-
-
+        updateBallPosition();
+        handleGameOverConditions();
+        handleBreakCollisions();
+        handleWallCollisions();
+        handleBlockCollisions();
     }
+
+    private void updateBallPosition() {
+        yBall += goDownBall ? vY : -vY;
+        xBall += goRightBall ? vX : -vX;
+    }
+
+
+
+    private void handleBreakCollisions() {
+        if (yBall >= yBreak - ballRadius && xBall >= xBreak && xBall <= xBreak + breakWidth) {
+            calculateBallDirectionAfterBreakCollision();
+        }
+    }
+
+    private void calculateBallDirectionAfterBreakCollision() {
+        hitTime = time;
+        resetColideFlags();
+        colideToBreak = true;
+        goDownBall = false;
+
+        double relation = (xBall - centerBreakX) / ((double) breakWidth / 2);
+        vX = calculateVelocityX(relation, level);
+        colideToBreakAndMoveToRight = xBall - centerBreakX > 0;
+        goRightBall = colideToBreakAndMoveToRight;
+    }
+
+    private double calculateVelocityX(double relation, int level) {
+        if (Math.abs(relation) <= 0.3) {
+            return Math.abs(relation);
+        } else if (Math.abs(relation) > 0.3 && Math.abs(relation) <= 0.7) {
+            return (Math.abs(relation) * 1.5) + (level / 3.500);
+        } else {
+            return (Math.abs(relation) * 2) + (level / 3.500);
+        }
+    }
+
+    private void handleGameOverConditions() {
+        if (yBall <= 0 || yBall >= sceneHeigt) {
+            resetColideFlags();
+            goDownBall = yBall <= 0;
+
+            if (!isGoldStauts && yBall >= sceneHeigt) {
+                handleGameEndScenario();
+            }
+        }
+    }
+
+    private void handleGameEndScenario() {
+        heart--;
+        new Score().show((double) sceneWidth / 2, (double) sceneHeigt / 2, -1, this);
+
+        if (heart == 0) {
+            new Score().showGameOver(this);
+            engine.stop();
+        }
+    }
+
+    private void handleWallCollisions() {
+        if (xBall >= sceneWidth || xBall <= 0) {
+            resetColideFlags();
+            colideToRightWall = xBall >= sceneWidth;
+            goRightBall = xBall <= 0;
+        }
+    }
+
+    private void handleBlockCollisions() {
+        if (colideToTopBlock) {
+            handleTopBlockCollision();
+        } else if (colideToBottomBlock) {
+            handleBottomBlockCollision();
+        } else if (colideToLeftBlock) {
+            handleLeftBlockCollision();
+        } else if (colideToRightBlock) {
+            handleRightBlockCollision();
+        } else if (colideToTopLeftBlock) {
+            handleTopLeftBlockCollision();
+        } else if (colideToTopRightBlock) {
+            handleTopRightBlockCollision();
+        } else if (colideToBottomLeftBlock) {
+            handleBottomLeftBlockCollision();
+        } else if (colideToBottomRightBlock) {
+            handleBottomRightBlockCollision();
+        }
+    }
+
+    private void handleTopBlockCollision() {
+        goDownBall = false;
+    }
+
+    private void handleBottomBlockCollision() {
+        goDownBall = true;
+    }
+
+    private void handleLeftBlockCollision() {
+        goRightBall = false;
+    }
+
+    private void handleRightBlockCollision() {
+        goRightBall = true;
+    }
+
+    private void handleTopLeftBlockCollision() {
+        if (!goDownBall) {
+            goRightBall = false;
+        } else if (!goRightBall) {
+            goDownBall = false;
+        } else {
+            goDownBall = false;
+        }
+    }
+
+    private void handleTopRightBlockCollision() {
+        if (!goDownBall) {
+            goRightBall = true;
+        } else if (goRightBall) {
+            goDownBall = false;
+        } else {
+            goDownBall = false;
+        }
+    }
+
+    private void handleBottomLeftBlockCollision() {
+        if (goDownBall) {
+            goRightBall = false;
+        } else if (!goRightBall) {
+            goDownBall = true;
+        } else {
+            goDownBall = true;
+        }
+    }
+
+    private void handleBottomRightBlockCollision() {
+        if (goDownBall) {
+            goRightBall = true;
+        } else if (goRightBall) {
+            goDownBall = true;
+        } else {
+            goDownBall = true;
+        }
+    }
+
 
     private GameState currentState = GameState.RUNNING;
     private void checkDestroyedCount() {
