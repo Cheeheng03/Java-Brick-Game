@@ -449,19 +449,27 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     private void handleBlockCollisions() {
         if (colideToTopBlock) {
             handleTopBlockCollision();
-        } else if (colideToBottomBlock) {
+        }
+        if (colideToBottomBlock) {
             handleBottomBlockCollision();
-        } else if (colideToLeftBlock) {
+        }
+        if (colideToLeftBlock) {
             handleLeftBlockCollision();
-        } else if (colideToRightBlock) {
+        }
+        if (colideToRightBlock) {
             handleRightBlockCollision();
-        } else if (colideToTopLeftBlock) {
+        }
+
+        if (colideToTopLeftBlock) {
             handleTopLeftBlockCollision();
-        } else if (colideToTopRightBlock) {
+        }
+        if (colideToTopRightBlock) {
             handleTopRightBlockCollision();
-        } else if (colideToBottomLeftBlock) {
+        }
+        if (colideToBottomLeftBlock) {
             handleBottomLeftBlockCollision();
-        } else if (colideToBottomRightBlock) {
+        }
+        if (colideToBottomRightBlock) {
             handleBottomRightBlockCollision();
         }
     }
