@@ -301,8 +301,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     }
 
 
-
-
     private void initBall() {
         Random random = new Random();
 
@@ -659,36 +657,43 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
 
     private void nextLevel() {
-        if (currentState != GameState.NEXT_LEVEL_TRANSITION) {
-            System.err.println("nextLevel called but not in NEXT_LEVEL_TRANSITION state.");
-            return;
-        }
-
         Platform.runLater(() -> {
             try {
-                vX = 1.000;
-                resetColideFlags();
-                goDownBall = true;
-                isGoldStauts = false;
-                isExistHeartBlock = false;
-                hitTime = 0;
-                time = 0;
-                goldTime = 0;
-
-                engine.stop();
-                blocks.clear();
-                chocos.clear();
-                destroyedBlockCount = 0;
-
+                initializeNextLevel();
+                resetGameElements();
                 start(primaryStage);
+
             } catch (Exception e) {
-                e.printStackTrace();
+                handleException(e);
+
             } finally {
-                // Only reset to RUNNING state after all next level setup is done.
                 currentState = GameState.RUNNING;
             }
         });
+
         readyForNextLevel = false;
+    }
+
+    private void initializeNextLevel() {
+        vX = 1.000;
+        resetColideFlags();
+        goDownBall = true;
+        isGoldStauts = false;
+        isExistHeartBlock = false;
+        hitTime = 0;
+        time = 0;
+        goldTime = 0;
+    }
+
+    private void resetGameElements() {
+        engine.stop();
+        blocks.clear();
+        chocos.clear();
+        destroyedBlockCount = 0;
+    }
+
+    private void handleException(Exception e) {
+        e.printStackTrace();
     }
 
 
@@ -721,11 +726,17 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
     @Override
     public void onUpdate() {
-        if (readyForNextLevel) {
-            System.out.println("Skip");
-            return;
+        updateLabelsAndPosition();
+        checkBallPosition();
 
+        if (yBall >= Block.getPaddingTop() && yBall <= (Block.getHeight() * (level + 1)) + Block.getPaddingTop()) {
+            updateBlockCollisions();
         }
+
+        removeDestroyedBlocks();
+    }
+
+    private void updateLabelsAndPosition() {
         xBallPrevious = xBall;
         yBallPrevious = yBall;
 
@@ -742,32 +753,32 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 choco.choco.setY(choco.y);
             }
         });
+    }
 
+    private void checkBallPosition() {
         if (yBall >= sceneHeigt) {
-            // Ball hits the bottom, trigger immediate rebound
             goDownBall = false;
             setPhysicsToBall();
-            return;
         }
+    }
 
-        if (yBall >= Block.getPaddingTop() && yBall <= (Block.getHeight() * (level + 1)) + Block.getPaddingTop()) {
-            for (final Block block : blocks) {
-                int hitCode = block.checkHitToBlock(xBall, yBall, xBallPrevious, yBallPrevious, ballRadius);
-                if (hitCode != Block.NO_HIT) {
-                    score += 1;
-                    new Score().show(block.x, block.y, 1, this);
-                    block.isDestroyed = true;
-                    blocksToRemove.add(block);
+    private void updateBlockCollisions() {
+        for (final Block block : blocks) {
+            int hitCode = block.checkHitToBlock(xBall, yBall, xBallPrevious, yBallPrevious, ballRadius);
+            if (hitCode != Block.NO_HIT) {
+                score += 1;
+                new Score().show(block.x, block.y, 1, this);
+                block.isDestroyed = true;
+                blocksToRemove.add(block);
 
-                    handleSpecialBlock(block);
+                handleSpecialBlock(block);
 
-                    setCollisionFlags(hitCode);
-                    setPhysicsToBall();
-                }
+                setCollisionFlags(hitCode);
+                setPhysicsToBall();
             }
         }
-        removeDestroyedBlocks();
     }
+
 
     private void handleSpecialBlock(final Block block) {
         if (block.type == Block.BLOCK_CHOCO) {
