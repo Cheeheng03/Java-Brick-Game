@@ -114,7 +114,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     private void initializeGameElements() {
         if (!loadFromSave) {
             level++;
-            levelLabel.setText("Level : " + level);
+            updateLabels();
             if (level > 1) {
                 new Score().showMessage("Level Up :)", this);
             }
@@ -136,9 +136,16 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             initBoard();
 
             initialBlockCount = blocks.size();
+        } else{
+            updateLabels();
         }
     }
 
+    private void updateLabels() {
+        scoreLabel.setText("Score : " + score);
+        heartLabel.setText("Heart : " + heart);
+        levelLabel.setText("Level : " + level);
+    }
 
     private Pane createRootPane() {
         Pane root = new Pane();
@@ -166,9 +173,9 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     }
 
     private void createLabelsAndButtons() {
-        scoreLabel = new Label("Score : 0");
-        heartLabel = new Label("Heart : 3");
-        levelLabel = new Label("Level : 1");
+        scoreLabel = new Label("Score : ");
+        heartLabel = new Label("Heart : ");
+        levelLabel = new Label("Level : ");
 
         levelLabel.setTranslateY(20);
         heartLabel.setTranslateX(sceneWidth - 75);
@@ -335,8 +342,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         return new ImagePattern(new Image("block.jpg"));
     }
 
-
-
     private boolean goDownBall                  = true;
     private boolean goRightBall                 = true;
     private boolean colideToBreak               = false;
@@ -386,8 +391,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         yBall += goDownBall ? vY : -vY;
         xBall += goRightBall ? vX : -vX;
     }
-
-
 
     private void handleBreakCollisions() {
         if (yBall >= yBreak - ballRadius && xBall >= xBreak && xBall <= xBreak + breakWidth) {
@@ -530,7 +533,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         }
     }
 
-
     private GameState currentState = GameState.RUNNING;
     private void checkDestroyedCount() {
         if (destroyedBlockCount == initialBlockCount && currentState == GameState.RUNNING) {
@@ -541,68 +543,8 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
     private void saveGame() {
         if (level < 18 && heart > 0) {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    new File(savePathDir).mkdirs();
-                    File file = new File(savePath);
-                    ObjectOutputStream outputStream = null;
-                    try {
-                        outputStream = new ObjectOutputStream(new FileOutputStream(file));
-
-                        outputStream.writeInt(level);
-                        outputStream.writeInt(score);
-                        outputStream.writeInt(heart);
-                        outputStream.writeInt(destroyedBlockCount);
-
-                        outputStream.writeDouble(xBall);
-                        outputStream.writeDouble(yBall);
-                        outputStream.writeDouble(xBreak);
-                        outputStream.writeDouble(yBreak);
-                        outputStream.writeDouble(centerBreakX);
-                        outputStream.writeLong(time);
-                        outputStream.writeLong(goldTime);
-                        outputStream.writeDouble(vX);
-
-                        outputStream.writeBoolean(isExistHeartBlock);
-                        outputStream.writeBoolean(isGoldStauts);
-                        outputStream.writeBoolean(goDownBall);
-                        outputStream.writeBoolean(goRightBall);
-                        outputStream.writeBoolean(colideToBreak);
-                        outputStream.writeBoolean(colideToBreakAndMoveToRight);
-                        outputStream.writeBoolean(colideToRightWall);
-                        outputStream.writeBoolean(colideToLeftWall);
-                        outputStream.writeBoolean(colideToRightBlock);
-                        outputStream.writeBoolean(colideToBottomBlock);
-                        outputStream.writeBoolean(colideToLeftBlock);
-                        outputStream.writeBoolean(colideToTopBlock);
-
-                        ArrayList<BlockSerializable> blockSerializables = new ArrayList<BlockSerializable>();
-                        for (Block block : blocks) {
-                            if (block.isDestroyed) {
-                                continue;
-                            }
-                            blockSerializables.add(new BlockSerializable(block.row, block.column, block.type));
-                        }
-
-                        outputStream.writeObject(blockSerializables);
-
-                        new Score().showMessage("Game Saved", Main.this);
-
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } finally {
-                        try {
-                            outputStream.flush();
-                            outputStream.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            }).start();
+            Timeline timeline = new Timeline(new KeyFrame(Duration.millis(1), e -> saveGameState()));
+            timeline.play();
         } else {
             // Display a message indicating that the game is over and cannot be saved
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -613,16 +555,112 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         }
     }
 
-    private void loadGame() {
+    private void saveGameState() {
+        new File(savePathDir).mkdirs();
+        File file = new File(savePath);
+        try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(file))) {
+            outputStream.writeInt(level);
+            outputStream.writeInt(score);
+            outputStream.writeInt(heart);
+            outputStream.writeInt(destroyedBlockCount);
 
+            outputStream.writeDouble(xBall);
+            outputStream.writeDouble(yBall);
+            // Save the previous ball positions
+            outputStream.writeDouble(xBallPrevious);
+            outputStream.writeDouble(yBallPrevious);
+            outputStream.writeDouble(xBreak);
+            outputStream.writeDouble(yBreak);
+            outputStream.writeDouble(centerBreakX);
+            outputStream.writeLong(time);
+            outputStream.writeLong(goldTime);
+            outputStream.writeDouble(vX);
+            outputStream.writeDouble(vY);
+
+            // Saving boolean flags
+            outputStream.writeBoolean(isExistHeartBlock);
+            outputStream.writeBoolean(isGoldStauts);
+            outputStream.writeBoolean(goDownBall);
+            outputStream.writeBoolean(goRightBall);
+            // Save all collision flags
+            saveCollisionFlags(outputStream);
+
+            saveBlocks(outputStream);
+
+            // Notify the user that the game has been saved
+            new Score().showMessage("Game Saved", Main.this);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void saveCollisionFlags(ObjectOutputStream outputStream) throws IOException {
+        outputStream.writeBoolean(colideToBreak);
+        outputStream.writeBoolean(colideToBreakAndMoveToRight);
+        outputStream.writeBoolean(colideToRightWall);
+        outputStream.writeBoolean(colideToLeftWall);
+        outputStream.writeBoolean(colideToRightBlock);
+        outputStream.writeBoolean(colideToBottomBlock);
+        outputStream.writeBoolean(colideToLeftBlock);
+        outputStream.writeBoolean(colideToTopBlock);
+        outputStream.writeBoolean(colideToTopLeftBlock);
+        outputStream.writeBoolean(colideToTopRightBlock);
+        outputStream.writeBoolean(colideToBottomLeftBlock);
+        outputStream.writeBoolean(colideToBottomRightBlock);
+    }
+
+    private void saveBlocks(ObjectOutputStream outputStream) throws IOException {
+        ArrayList<BlockSerializable> blockSerializables = new ArrayList<>();
+        for (Block block : blocks) {
+            if (block.isDestroyed) {
+                continue;
+            }
+            blockSerializables.add(new BlockSerializable(block.row, block.column, block.type));
+        }
+        outputStream.writeObject(blockSerializables);
+    }
+
+    private void loadGame() {
         LoadSave loadSave = new LoadSave();
         loadSave.read();
 
+        level = loadSave.level;
+        score = loadSave.score;
+        heart = loadSave.heart;
+        destroyedBlockCount = loadSave.destroyedBlockCount;
+
+        xBall = loadSave.xBall;
+        yBall = loadSave.yBall;
+        xBallPrevious = loadSave.xBallPrevious;
+        yBallPrevious = loadSave.yBallPrevious;
+        xBreak = loadSave.xBreak;
+        yBreak = loadSave.yBreak;
+        centerBreakX = loadSave.centerBreakX;
+        time = loadSave.time;
+        goldTime = loadSave.goldTime;
+        vX = loadSave.vX;
+        vY = loadSave.vY;
 
         isExistHeartBlock = loadSave.isExistHeartBlock;
         isGoldStauts = loadSave.isGoldStauts;
         goDownBall = loadSave.goDownBall;
         goRightBall = loadSave.goRightBall;
+
+        restoreCollisionFlags(loadSave);
+
+        restoreBlocks(loadSave);
+
+        initialBlockCount = blocks.size() + destroyedBlockCount;
+
+        try {
+            loadFromSave = true;
+            start(primaryStage);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void restoreCollisionFlags(LoadSave loadSave) {
         colideToBreak = loadSave.colideToBreak;
         colideToBreakAndMoveToRight = loadSave.colideToBreakAndMoveToRight;
         colideToRightWall = loadSave.colideToRightWall;
@@ -631,38 +669,19 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         colideToBottomBlock = loadSave.colideToBottomBlock;
         colideToLeftBlock = loadSave.colideToLeftBlock;
         colideToTopBlock = loadSave.colideToTopBlock;
-        level = loadSave.level;
-        score = loadSave.score;
-        heart = loadSave.heart;
-        destroyedBlockCount = loadSave.destroyedBlockCount;
-        xBall = loadSave.xBall;
-        yBall = loadSave.yBall;
-        xBreak = loadSave.xBreak;
-        yBreak = loadSave.yBreak;
-        centerBreakX = loadSave.centerBreakX;
-        time = loadSave.time;
-        goldTime = loadSave.goldTime;
-        vX = loadSave.vX;
-
-        blocks.clear();
-        chocos.clear();
-
-        for (BlockSerializable ser : loadSave.blocks) {
-            int r = new Random().nextInt(200);
-            blocks.add(new Block(ser.row, ser.j, ser.type));
-        }
-
-
-        try {
-            loadFromSave = true;
-            start(primaryStage);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-
+        colideToTopLeftBlock = loadSave.colideToTopLeftBlock;
+        colideToTopRightBlock = loadSave.colideToTopRightBlock;
+        colideToBottomLeftBlock = loadSave.colideToBottomLeftBlock;
+        colideToBottomRightBlock = loadSave.colideToBottomRightBlock;
     }
 
+    private void restoreBlocks(LoadSave loadSave) {
+        blocks.clear();
+        chocos.clear();
+        for (BlockSerializable ser : loadSave.blocks) {
+            blocks.add(new Block(ser.row, ser.j, ser.type));
+        }
+    }
 
     private void nextLevel() {
         Platform.runLater(() -> {
