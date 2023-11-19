@@ -704,7 +704,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         e.printStackTrace();
     }
 
-
     public void restartGame() {
         Platform.runLater(() -> {
             try {
@@ -855,34 +854,60 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     @Override
     public void onPhysicsUpdate() {
         checkDestroyedCount();
-
         setPhysicsToBall();
+        updateGoldStatus();
+        updateChocos();
 
+        // System.out.println("time is:" + time + " goldTime is " + goldTime);
+    }
 
+    private void updateGoldStatus() {
         if (time - goldTime > 5000) {
-            ball.setFill(new ImagePattern(new Image("ball.png")));
-            root.getStyleClass().remove("goldRoot");
-            root.getStyleClass().add("bgImageRoot");
-            isGoldStauts = false;
+            resetGoldStatus();
         }
+    }
 
+    private void resetGoldStatus() {
+        ball.setFill(new ImagePattern(new Image("ball.png")));
+        root.getStyleClass().remove("goldRoot");
+        root.getStyleClass().add("bgImageRoot");
+        isGoldStauts = false;
+    }
+
+    private void updateChocos() {
         for (Bonus choco : chocos) {
-            if (choco.y > sceneHeigt || choco.taken) {
+            if (shouldSkipChoco(choco)) {
                 continue;
             }
-            if (choco.y >= yBreak && choco.y <= yBreak + breakHeight && choco.x >= xBreak && choco.x <= xBreak + breakWidth) {
-                System.out.println("You Got it and +3 score for you");
-                choco.taken = true;
-                choco.choco.setVisible(false);
-                score += 3;
-                new Score().show(choco.x, choco.y, 3, this);
-            }
-            choco.y += ((time - choco.timeCreated) / 1000.000) + 1.000;
+
+            handleChocoCollision(choco);
+            updateChocoPosition(choco);
         }
-
-        //System.out.println("time is:" + time + " goldTime is " + goldTime);
-
     }
+
+    private boolean shouldSkipChoco(Bonus choco) {
+        return choco.y > sceneHeigt || choco.taken;
+    }
+
+    private void handleChocoCollision(Bonus choco) {
+        if (choco.y >= yBreak && choco.y <= yBreak + breakHeight
+                && choco.x >= xBreak && choco.x <= xBreak + breakWidth) {
+            processChocoCollision(choco);
+        }
+    }
+
+    private void processChocoCollision(Bonus choco) {
+        System.out.println("You Got it and +3 score for you");
+        choco.taken = true;
+        choco.choco.setVisible(false);
+        score += 3;
+        new Score().show(choco.x, choco.y, 3, this);
+    }
+
+    private void updateChocoPosition(Bonus choco) {
+        choco.y += ((time - choco.timeCreated) / 1000.000) + 1.000;
+    }
+
 
 
     @Override
