@@ -24,11 +24,13 @@ import javafx.util.Duration;
 
 import java.io.*;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 
 public class Main extends Application implements EventHandler<KeyEvent>, GameEngine.OnAction {
 
     private int level = 0;
-
     private double xBreak = 0.0f;
     private double centerBreakX;
     private double yBreak = 640.0f;
@@ -56,7 +58,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     private int       ballRadius = 10;
 
     private double v = 1.000;
-
     private int  heart    = 3;
     private int  score    = 0;
     private long time     = 0;
@@ -84,7 +85,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     private boolean loadFromSave = false;
     private Queue<Block> blocksToRemove = new LinkedList<>();
     private boolean readyForNextLevel = false;
-
+    private static final Logger logger = Logger.getLogger(Main.class.getName());
     private Timeline moveTimeline;
 
     Stage  primaryStage;
@@ -297,7 +298,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 try {
                     Thread.sleep(sleepTime);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    handleException(e);
                 }
 
                 if (i >= 20) {
@@ -590,7 +591,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             // Notify the user that the game has been saved
             new Score().showMessage("Game Saved", Main.this);
         } catch (IOException e) {
-            e.printStackTrace();
+            handleException(e);
         }
     }
 
@@ -656,7 +657,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             loadFromSave = true;
             start(primaryStage);
         } catch (Exception e) {
-            e.printStackTrace();
+            handleException(e);
         }
     }
 
@@ -689,10 +690,8 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 initializeNextLevel();
                 resetGameElements();
                 start(primaryStage);
-
             } catch (Exception e) {
                 handleException(e);
-
             } finally {
                 currentState = GameState.RUNNING;
             }
@@ -719,10 +718,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         destroyedBlockCount = 0;
     }
 
-    private void handleException(Exception e) {
-        e.printStackTrace();
-    }
-
     public void restartGame() {
         Platform.runLater(() -> {
             try {
@@ -745,7 +740,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
                 start(primaryStage);
             } catch (Exception e) {
-                e.printStackTrace();
+                handleException(e);
             }
         });
     }
@@ -927,10 +922,12 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         choco.y += ((time - choco.timeCreated) / 1000.000) + 1.000;
     }
 
-
-
     @Override
     public void onTime(long time) {
         this.time = time;
+    }
+
+    private void handleException(Exception e) {
+        logger.log(Level.SEVERE, "An error occurred: " + e.getMessage(), e);
     }
 }
