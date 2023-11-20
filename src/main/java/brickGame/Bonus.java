@@ -8,16 +8,15 @@ import java.io.Serializable;
 import java.util.Random;
 
 public class Bonus implements Serializable {
-    public Rectangle choco;
-
-    public double x;
-    public double y;
-    public long timeCreated;
-    public boolean taken = false;
+    private Rectangle choco;
+    private double x;
+    private double y;
+    long timeCreated;
+    private boolean taken = false;
 
     public Bonus(int row, int column) {
-        x = (column * (Block.getWidth())) + Block.getPaddingH() + (Block.getWidth() / 2) - 15;
-        y = (row * (Block.getHeight())) + Block.getPaddingTop() + (Block.getHeight() / 2) - 15;
+        x = (column * (Block.getWidth())) + Block.getPaddingH() + ((double) Block.getWidth() / 2) - 15;
+        y = (row * (Block.getHeight())) + Block.getPaddingTop() + ((double) Block.getHeight() / 2) - 15;
 
         draw();
     }
@@ -39,6 +38,32 @@ public class Bonus implements Serializable {
         choco.setFill(new ImagePattern(new Image(url)));
     }
 
+    public Rectangle getChoco() {
+        return choco;
+    }
 
+    public double getX() {
+        return x;
+    }
+
+    public double getY() {
+        return y;
+    }
+
+    public long getTimeCreated() {
+        return timeCreated;
+    }
+
+    public boolean isTaken() {
+        return taken;
+    }
+
+    public void setTaken(boolean taken) {
+        this.taken = taken;
+    }
+
+    public void updateY(long currentTime) {
+        y = y + ((currentTime - timeCreated) / 1000.000) + 1.000;
+    }
 
 }

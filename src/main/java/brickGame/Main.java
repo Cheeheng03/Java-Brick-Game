@@ -30,7 +30,7 @@ import java.util.logging.Logger;
 
 public class Main extends Application implements EventHandler<KeyEvent>, GameEngine.OnAction {
 
-    private int level = 0;
+    private int level =0;
     private double xBreak = 0.0f;
     private double centerBreakX;
     private double yBreak = 640.0f;
@@ -58,7 +58,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     private int       ballRadius = 10;
 
     private double v = 1.000;
-    private int  heart    = 3;
+    private int  heart    = 1000000;
     private int  score    = 0;
     private long time     = 0;
     private long hitTime  = 0;
@@ -101,7 +101,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         initializeGameElements();
 
         root = createRootPane();
-
 
         if (!loadFromSave) {
             initializeGameButtons();
@@ -771,7 +770,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             ball.setCenterY(yBall);
 
             for (Bonus choco : chocos) {
-                choco.choco.setY(choco.y);
+                choco.getChoco().setY(choco.getY());
             }
         });
     }
@@ -805,7 +804,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         if (block.type == Block.BLOCK_CHOCO) {
             final Bonus choco = new Bonus(block.row, block.column);
             choco.timeCreated = time;
-            Platform.runLater(() -> root.getChildren().add(choco.choco));
+            Platform.runLater(() -> root.getChildren().add(choco.getChoco()));
             chocos.add(choco);
         } else if (block.type == Block.BLOCK_STAR) {
             goldTime = time;
@@ -900,27 +899,29 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     }
 
     private boolean shouldSkipChoco(Bonus choco) {
-        return choco.y > sceneHeigt || choco.taken;
+        return choco.getY() > sceneHeigt || choco.isTaken();
     }
 
     private void handleChocoCollision(Bonus choco) {
-        if (choco.y >= yBreak && choco.y <= yBreak + breakHeight
-                && choco.x >= xBreak && choco.x <= xBreak + breakWidth) {
+        if (choco.getY() >= yBreak && choco.getY() <= yBreak + breakHeight
+                && choco.getX() >= xBreak && choco.getX() <= xBreak + breakWidth) {
             processChocoCollision(choco);
         }
     }
 
     private void processChocoCollision(Bonus choco) {
         System.out.println("You Got it and +3 score for you");
-        choco.taken = true;
-        choco.choco.setVisible(false);
+        choco.setTaken(true);
+        choco.getChoco().setVisible(false);
         score += 3;
-        new Score().show(choco.x, choco.y, 3, this);
+        new Score().show(choco.getX(), choco.getY(), 3, this);
     }
 
+
     private void updateChocoPosition(Bonus choco) {
-        choco.y += ((time - choco.timeCreated) / 1000.000) + 1.000;
+        choco.updateY(time);
     }
+
 
     @Override
     public void onTime(long time) {
