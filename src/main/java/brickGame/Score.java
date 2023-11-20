@@ -76,6 +76,6 @@ public class Score {
         label.setScaleX(2);
         label.setScaleY(2);
 
-        main.root.getChildren().add(label);
+        Platform.runLater(() -> main.root.getChildren().add(label));
     }
 }

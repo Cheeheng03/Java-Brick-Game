@@ -30,12 +30,12 @@ import java.util.logging.Logger;
 
 public class Main extends Application implements EventHandler<KeyEvent>, GameEngine.OnAction {
 
-    private int level =0;
+    private int level = 0;
     private double xBreak = 0.0f;
     private double centerBreakX;
     private double yBreak = 640.0f;
 
-    private int breakWidth     = 500;
+    private int breakWidth     = 130;
     private int breakHeight    = 30;
     private int halfBreakWidth = breakWidth / 2;
 
@@ -58,7 +58,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     private int       ballRadius = 10;
 
     private double v = 1.000;
-    private int  heart    = 1000000;
+    private int  heart    = 3;
     private int  score    = 0;
     private long time     = 0;
     private long hitTime  = 0;
@@ -116,14 +116,18 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     private void initializeGameElements() {
         if (!loadFromSave) {
             level++;
+            System.out.println(level);
             updateLabels();
-            if (level > 1) {
-                new Score().showMessage("Level Up :)", this);
-            }
             if (level == 18) {
                 new Score().showWin(this);
+                load.setVisible(false);
+                newGame.setVisible(false);
                 return;
             }
+            if (level > 1 && level <18) {
+                new Score().showMessage("Level Up :)", this);
+            }
+
 
             if (level == 1) {
                 load.setVisible(true);
@@ -424,15 +428,20 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     }
 
     private void handleGameOverConditions() {
-        if (gameball.getY() <= 0 || gameball.getY() >= sceneHeigt) {
+        if (gameball.getY() <= 0 || gameball.getY() >= sceneHeigt - gameball.getRadius()) {
             resetColideFlags();
+            if (gameball.getY() >= sceneHeigt - gameball.getRadius()) {
+                gameball.bounceUp();
+            }
             if (gameball.getY() <= 0) {
                 gameball.bounceDown();
-            } else if (!isGoldStauts && gameball.getY() >= sceneHeigt) {
+            }
+            if (!isGoldStauts && gameball.getY() >= sceneHeigt - gameball.getRadius()) {
                 handleGameEndScenario();
             }
         }
     }
+
 
     private void handleGameEndScenario() {
         heart--;
