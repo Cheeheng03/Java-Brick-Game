@@ -3,16 +3,16 @@ package brickGame;
 public class Ball {
     private double x;
     private double y;
-    private final double radius;
+    private final int radius;
     private double velocityX;
     private double velocityY;
     private boolean goingDown;
     private boolean goingRight;
 
-    public Ball(double startX, double startY, double radius) {
+    public Ball(double startX, double startY) {
         this.x = startX;
         this.y = startY;
-        this.radius = radius;
+        this.radius = 10;
         this.velocityX = 1.0;
         this.velocityY = 1.0;
         this.goingDown = true;
@@ -65,7 +65,7 @@ public class Ball {
         this.y = y;
     }
 
-    public double getRadius() {
+    public int getRadius() {
         return radius;
     }
 

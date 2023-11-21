@@ -55,7 +55,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     private boolean isExistHeartBlock = false;
 
     private Rectangle rect;
-    private int       ballRadius = 10;
 
     private double v = 1.000;
     private int  heart    = 3;
@@ -93,6 +92,8 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     Button newGame = null;
 
     private Ball gameball;
+
+    private Paddle paddle;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -137,8 +138,9 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 newGame.setVisible(false);
             }
 
-            initBall();
+
             initBreak();
+            initBall();
             initBoard();
 
             initialBlockCount = blocks.size();
@@ -288,17 +290,17 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             int maxIterations = 30;
 
             for (int i = 0; i < maxIterations; i++) {
-                if ((xBreak == 0 && direction == LEFT) || (xBreak == (sceneWidth - breakWidth) && direction == RIGHT)) {
+                if ((paddle.getX() <= 0 && direction == LEFT) || (paddle.getX() >= (sceneWidth - paddle.getWidth()) && direction == RIGHT)) {
                     return;
                 }
 
                 if (direction == RIGHT) {
-                    xBreak++;
-                } else {
-                    xBreak--;
+                    paddle.moveRight(sceneWidth);
+                } else if (direction == LEFT) {
+                    paddle.moveLeft();
                 }
 
-                centerBreakX = xBreak + halfBreakWidth;
+                centerBreakX = paddle.getX() + paddle.getWidth() / 2;
 
                 try {
                     Thread.sleep(sleepTime);
@@ -314,19 +316,21 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     }
 
 
+
     private void initBall() {
         Random random = new Random();
 
         xBall = random.nextInt(sceneWidth) + 1;
 
         int blocksBottomY = (int) ((level + 1) * Block.getHeight() + Block.getPaddingTop());
-        int paddleTopY = (int) yBreak;
+        int paddleTopY = (int) paddle.getY();
 
+        int ballRadius = 10;
         int ballMinY = blocksBottomY + ballRadius;
         int ballMaxY = paddleTopY - ballRadius;
 
         yBall = (ballMinY < ballMaxY) ? random.nextInt(ballMaxY - ballMinY) + ballMinY : ballMinY;
-        gameball = new Ball(xBall, yBall, ballRadius);
+        gameball = new Ball(xBall, yBall);
         createBall();
     }
 
@@ -336,12 +340,13 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
 
     private void initBreak() {
+        paddle = new Paddle();
         rect = createBreakRectangle();
         rect.setFill(createBreakFill());
     }
 
     private Rectangle createBreakRectangle() {
-        return new Rectangle(xBreak, yBreak, breakWidth, breakHeight);
+        return new Rectangle(paddle.getX(), paddle.getY(), paddle.getWidth(), paddle.getHeight());
     }
 
     private Paint createBreakFill() {
@@ -394,7 +399,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     }
 
     private void handleBreakCollisions() {
-        if (gameball.getY() >= yBreak - gameball.getRadius() && gameball.getX() >= xBreak && gameball.getX() <= xBreak + breakWidth) {
+        if (gameball.getY() >= paddle.getY() - gameball.getRadius() && gameball.getX() >= paddle.getX() && gameball.getX() <= paddle.getX() + paddle.getWidth()) {
             calculateBallDirectionAfterBreakCollision();
         }
     }
@@ -405,7 +410,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         colideToBreak = true;
         gameball.bounceUp();
 
-        double relation = (gameball.getX() - centerBreakX) / ((double) breakWidth / 2);
+        double relation = (gameball.getX() - centerBreakX) / ((double) paddle.getWidth() / 2);
         double newVelocityX = calculateVelocityX(relation, level);
         gameball.setVelocityX(newVelocityX);
 
@@ -770,15 +775,15 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     }
 
     private void updateLabelsAndPosition() {
-        xBallPrevious = gameball.getX();
-        yBallPrevious = gameball.getY();
+//        xBallPrevious = gameball.getX();
+//        yBallPrevious = gameball.getY();
 
         Platform.runLater(() -> {
             scoreLabel.setText("Score : " + score);
             heartLabel.setText("Heart : " + heart);
 
-            rect.setX(xBreak);
-            rect.setY(yBreak);
+            rect.setX(paddle.getX());
+            rect.setY(paddle.getY());
             ball.setCenterX(gameball.getX());
             ball.setCenterY(gameball.getY());
 
@@ -916,8 +921,8 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     }
 
     private void handleChocoCollision(Bonus choco) {
-        if (choco.getY() >= yBreak && choco.getY() <= yBreak + breakHeight
-                && choco.getX() >= xBreak && choco.getX() <= xBreak + breakWidth) {
+        if (choco.getY() >= paddle.getY() && choco.getY() <= paddle.getY() + breakHeight
+                && choco.getX() >= paddle.getX() && choco.getX() <= paddle.getX() + paddle.getWidth()) {
             processChocoCollision(choco);
         }
     }
