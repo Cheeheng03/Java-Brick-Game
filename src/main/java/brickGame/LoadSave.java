@@ -1,10 +1,10 @@
 package brickGame;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
+import java.io.*;
 import java.util.ArrayList;
+
+import static brickGame.Main.savePath;
+import static brickGame.Main.savePathDir;
 
 public class LoadSave {
     public boolean          isExistHeartBlock;
@@ -38,48 +38,120 @@ public class LoadSave {
     public double           xBallPrevious;
     public double           yBallPrevious;
     public double           vY;
+    public static String savePath    = "C:/save/save.mdds";
+    public static String savePathDir = "C:/save/";
     public ArrayList<BlockSerializable> blocks = new ArrayList<BlockSerializable>();
 
+    public void saveGameState(GameModel gameModel) {
+        new File(savePathDir).mkdirs();
+        File file = new File(savePath);
+        try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(file))) {
+            outputStream.writeInt(gameModel.getLevel());
+            outputStream.writeInt(gameModel.getScore());
+            outputStream.writeInt(gameModel.getHeart());
+            outputStream.writeInt(gameModel.getDestroyedBlockCount());
+
+            outputStream.writeDouble(gameModel.getGameball().getX());
+            outputStream.writeDouble(gameModel.getGameball().getY());
+            // Save the previous ball positions
+            outputStream.writeDouble(gameModel.getXBallPrevious());
+            outputStream.writeDouble(gameModel.getYBallPrevious());
+            outputStream.writeDouble(gameModel.getPaddle().getX());
+            outputStream.writeDouble(gameModel.getPaddle().getY());
+            outputStream.writeDouble(gameModel.getPaddle().getCenterBreakX());
+            outputStream.writeLong(gameModel.getTime());
+            outputStream.writeLong(gameModel.getGoldTime());
+            outputStream.writeDouble(gameModel.getGameball().getVelocityX());
+            outputStream.writeDouble(gameModel.getGameball().getVelocityY());
+
+            // Saving boolean flags
+            outputStream.writeBoolean(gameModel.getIsExistHeartBlock());
+            outputStream.writeBoolean(gameModel.getIsGoldStatus());
+            outputStream.writeBoolean(gameModel.getGameball().isGoingDown());
+            outputStream.writeBoolean(gameModel.getGameball().isGoingRight());
+            // Save all collision flags
+            saveCollisionFlags(outputStream, gameModel);
+
+            saveBlocks(outputStream, gameModel);
+
+        } catch (IOException e) {
+            //handleException(e);
+            e.printStackTrace();
+        }
+    }
+
+    private void saveCollisionFlags(ObjectOutputStream outputStream, GameModel gameModel) throws IOException {
+        outputStream.writeBoolean(gameModel.isColideToBreak());
+        outputStream.writeBoolean(gameModel.isColideToBreakAndMoveToRight());
+        outputStream.writeBoolean(gameModel.isColideToRightWall());
+        outputStream.writeBoolean(gameModel.isColideToLeftWall());
+        outputStream.writeBoolean(gameModel.isColideToRightBlock());
+        outputStream.writeBoolean(gameModel.isColideToBottomBlock());
+        outputStream.writeBoolean(gameModel.isColideToLeftBlock());
+        outputStream.writeBoolean(gameModel.isColideToTopBlock());
+        outputStream.writeBoolean(gameModel.isColideToTopLeftBlock());
+        outputStream.writeBoolean(gameModel.isColideToTopRightBlock());
+        outputStream.writeBoolean(gameModel.isColideToBottomLeftBlock());
+        outputStream.writeBoolean(gameModel.isColideToBottomRightBlock());
+    }
+
+    private void saveBlocks(ObjectOutputStream outputStream, GameModel gameModel) throws IOException {
+        ArrayList<BlockSerializable> blockSerializables = new ArrayList<>();
+        for (Block block : gameModel.getBlocks()) {
+            if (block.isDestroyed) {
+                continue;
+            }
+            blockSerializables.add(new BlockSerializable(block.row, block.column, block.type));
+        }
+        outputStream.writeObject(blockSerializables);
+    }
 
     public void read() {
-        try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(new File(Main.savePath)))) {
+        try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(new File(savePath)))) {
 
-            level = inputStream.readInt();
-            score = inputStream.readInt();
-            heart = inputStream.readInt();
-            destroyedBlockCount = inputStream.readInt();
+            this.level = inputStream.readInt();
+            System.out.println("Level: " + this.level);
 
-            xBall = inputStream.readDouble();
-            yBall = inputStream.readDouble();
-            xBallPrevious = inputStream.readDouble();
-            yBallPrevious = inputStream.readDouble();
-            xBreak = inputStream.readDouble();
-            yBreak = inputStream.readDouble();
-            centerBreakX = inputStream.readDouble();
-            time = inputStream.readLong();
-            goldTime = inputStream.readLong();
-            vX = inputStream.readDouble();
-            vY = inputStream.readDouble();
+            this.score = inputStream.readInt();
+            System.out.println("Score: " + this.score);
 
-            isExistHeartBlock = inputStream.readBoolean();
-            isGoldStauts = inputStream.readBoolean();
-            goDownBall = inputStream.readBoolean();
-            goRightBall = inputStream.readBoolean();
-            colideToBreak = inputStream.readBoolean();
-            colideToBreakAndMoveToRight = inputStream.readBoolean();
-            colideToRightWall = inputStream.readBoolean();
-            colideToLeftWall = inputStream.readBoolean();
-            colideToRightBlock = inputStream.readBoolean();
-            colideToBottomBlock = inputStream.readBoolean();
-            colideToLeftBlock = inputStream.readBoolean();
-            colideToTopBlock = inputStream.readBoolean();
-            colideToTopLeftBlock = inputStream.readBoolean();
-            colideToTopRightBlock = inputStream.readBoolean();
-            colideToBottomLeftBlock = inputStream.readBoolean();
-            colideToBottomRightBlock = inputStream.readBoolean();
+            this.heart = inputStream.readInt();
+            System.out.println("Heart: " + this.heart);
+
+            this.destroyedBlockCount = inputStream.readInt();
+            System.out.println("Destroyed Block Count: " + this.destroyedBlockCount);
+
+            this.xBall = inputStream.readDouble();
+            this.yBall = inputStream.readDouble();
+            this.xBallPrevious = inputStream.readDouble();
+            this.yBallPrevious = inputStream.readDouble();
+            this.xBreak = inputStream.readDouble();
+            this.yBreak = inputStream.readDouble();
+            this.centerBreakX = inputStream.readDouble();
+            this.time = inputStream.readLong();
+            this.goldTime = inputStream.readLong();
+            this.vX = inputStream.readDouble();
+            this.vY = inputStream.readDouble();
+
+            this.isExistHeartBlock = inputStream.readBoolean();
+            this.isGoldStauts = inputStream.readBoolean();
+            this.goDownBall = inputStream.readBoolean();
+            this.goRightBall = inputStream.readBoolean();
+            this.colideToBreak = inputStream.readBoolean();
+            this.colideToBreakAndMoveToRight = inputStream.readBoolean();
+            this.colideToRightWall = inputStream.readBoolean();
+            this.colideToLeftWall = inputStream.readBoolean();
+            this.colideToRightBlock = inputStream.readBoolean();
+            this.colideToBottomBlock = inputStream.readBoolean();
+            this.colideToLeftBlock = inputStream.readBoolean();
+            this.colideToTopBlock = inputStream.readBoolean();
+            this.colideToTopLeftBlock = inputStream.readBoolean();
+            this.colideToTopRightBlock = inputStream.readBoolean();
+            this.colideToBottomLeftBlock = inputStream.readBoolean();
+            this.colideToBottomRightBlock = inputStream.readBoolean();
 
             try {
-                blocks = (ArrayList<BlockSerializable>) inputStream.readObject();
+                this.blocks = (ArrayList<BlockSerializable>) inputStream.readObject();
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
@@ -87,4 +159,5 @@ public class LoadSave {
             e.printStackTrace();
         }
     }
+
 }

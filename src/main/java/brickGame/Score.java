@@ -16,7 +16,7 @@ public class Score {
         label.setTranslateX(x);
         label.setTranslateY(y);
 
-        main.root.getChildren().add(label); // This is already running on JavaFX thread due to the calling method context
+        main.root.getChildren().add(label);
 
         Timeline timeline = new Timeline();
         timeline.getKeyFrames().addAll(

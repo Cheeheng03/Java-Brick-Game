@@ -3,6 +3,7 @@
     public class Paddle {
         private double x;
         private double y;
+        private double centerBreakX;
         private final int width;
         private final int height;
 
@@ -30,6 +31,13 @@
             this.x = x;
         }
 
+        public void setY(double y) {
+            this.y = y;
+        }
+        public void setCenterBreakX(double centerBreakX) {
+            this.centerBreakX = centerBreakX;
+        }
+
         public double getY() {
             return y;
         }
@@ -40,6 +48,9 @@
 
         public int getHeight() {
             return height;
+        }
+        public double getCenterBreakX() {
+            return centerBreakX = x + (double) width / 2;
         }
 
     }
