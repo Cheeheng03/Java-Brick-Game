@@ -1,7 +1,5 @@
 package brickGame;
 
-import javafx.application.Platform;
-
 import java.util.*;
 
 public class GameModel {
@@ -592,7 +590,6 @@ public class GameModel {
     public boolean isColideToBottomRightBlock() {
         return colideToBottomRightBlock;
     }
-
 
     // Setters
     public void setXBallPrevious(double x) {

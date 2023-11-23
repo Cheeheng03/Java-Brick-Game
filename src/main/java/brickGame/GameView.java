@@ -152,6 +152,4 @@ public class GameView {
     public Pane getRoot(){
         return root;
     }
-
-    // Other methods...
 }
