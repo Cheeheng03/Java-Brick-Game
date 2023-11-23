@@ -38,7 +38,6 @@ public class GameModel {
     private boolean colideToBottomRightBlock    = false;
 
     public GameModel() {
-
         this.paddle = new Paddle();
         this.gameball = initBall();
         this.blocks = new ArrayList<>();
@@ -174,8 +173,6 @@ public class GameModel {
         return !isGoldStatus && gameball.getY() >= sceneHeight - gameball.getRadius();
     }
 
-
-
     private void handleWallCollisions() {
         if (gameball.getX() >= sceneWidth || gameball.getX() <= 0) {
             resetColideFlags();
@@ -267,8 +264,9 @@ public class GameModel {
         }
     }
 
+
     public void updateBlockCollisions() {
-        for (final Block block : blocks) {
+            for (final Block block : blocks) {
             int hitCode = block.checkHitToBlock(gameball.getX(), gameball.getY(), xBallPrevious, yBallPrevious, gameball.getRadius());
             if (hitCode != Block.NO_HIT) {
                 addToScore(1);
@@ -401,6 +399,7 @@ public class GameModel {
         isExistHeartBlock = false;
         time = 0;
         goldTime = 0;
+        //lastHitTime = 0;
     }
 
     public void resetGameElements() {
@@ -479,12 +478,11 @@ public class GameModel {
     }
 
     private void restoreBlocksFromSerializable(ArrayList<BlockSerializable> blockSerializables) {
-        this.blocks.clear(); // Clear existing blocks
+        this.blocks.clear();
         for (BlockSerializable ser : blockSerializables) {
             this.blocks.add(new Block(ser.row, ser.j, ser.type));
         }
     }
-
 
     // Getter and setter methods
     public Ball getGameball() { return gameball; }

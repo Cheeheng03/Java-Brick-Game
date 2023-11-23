@@ -21,6 +21,7 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
     private static final int LEFT = 1;
     private static final int RIGHT = 2;
     private long time = 0;
+    private boolean previousGoldStatus = false;
     Stage  primaryStage;
     private static final Logger logger = Logger.getLogger(GameController.class.getName());
 
@@ -43,7 +44,9 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
         gameView.initializeUI(gameModel, loadFromSave);
         initializeGameElements();
         gameView.addToRoot(gameModel, loadFromSave);
-        gameView.setSceneToStage(primaryStage);
+        if(gameModel.getLevel()<18){
+            gameView.setSceneToStage(primaryStage);
+        }
         primaryStage.getScene().setOnKeyPressed(this);
         if (!loadFromSave) {
             initializeGameButtons();
@@ -195,12 +198,17 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
             isLevelTransitionInProgress = true;
             Platform.runLater(() -> {
                 try {
-                    gameModel.initializeNextLevel();
-                    engine.stop();
-                    gameModel.resetGameElements();
-                    gameView = null;
-                    gameView = new GameView();
-                    start(primaryStage);
+                    if(gameModel.getLevel() == 17){
+                        engine.stop();
+                        start(primaryStage);
+                    } else{
+                        gameModel.initializeNextLevel();
+                        engine.stop();
+                        gameModel.resetGameElements();
+                        gameView = null;
+                        gameView = new GameView();
+                        start(primaryStage);
+                    }
                 } catch (Exception e) {
                     handleException(e);
                 } finally {
@@ -259,7 +267,6 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
     private void updateBlockCollisionsUI() {
         for (Block block : gameModel.getBlocks()) {
             if (block.isDestroyed) {
-                //new Score().show(block.x, block.y, 1, this);
                 gameView.show(block.x, block.y, 1);
 
                 if (block.type == Block.BLOCK_CHOCO) {
@@ -271,7 +278,6 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
                         gameView.addGoldRoot();
                     });
                 } else if (block.type == Block.BLOCK_HEART) {
-                    //new Score().showMessage("Heart +1", this);
                     gameView.showMessage("Heart +1");
                 }
             }
@@ -287,9 +293,11 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
         updateGameState();
         setPhysicsToBall();
         gameModel.updateGoldStatus(time);
-        if (!gameModel.getIsGoldStatus()) {
+        boolean currentGoldStatus = gameModel.getIsGoldStatus();
+        if (!currentGoldStatus && previousGoldStatus) {
             gameView.resetGoldStatusUI();
         }
+        previousGoldStatus = currentGoldStatus;
 
         gameModel.updateChocos();
         updateChocoUI();
@@ -303,7 +311,6 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
                 choco.getChoco().setVisible(false);
                 gameView.show(choco.getX(), choco.getY(), 3);
                 System.out.println("You Got it and +3 score for you");
-
                 iterator.remove();
             }
         }

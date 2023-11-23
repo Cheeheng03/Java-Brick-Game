@@ -69,7 +69,6 @@ public class GameView {
     }
 
     public void setSceneToStage(Stage stage) {
-        System.out.println(root);
         Scene scene = new Scene(root, sceneWidth, sceneHeight);
         scene.getStylesheets().add("style.css");
         stage.setScene(scene);
@@ -107,8 +106,10 @@ public class GameView {
     }
     public void addGoldRoot(){
         ball.setFill(new ImagePattern(new Image("goldball.jpeg")));
+        root.getStyleClass().remove("goldRoot");
         root.getStyleClass().remove("bgImageRoot");
         root.getStyleClass().add("goldRoot");
+        System.out.println("Gold Ball");
     }
 
     public void resetGoldStatusUI() {
