@@ -12,7 +12,7 @@ public class GameModel {
     private Queue<Block> blocksToRemove;
     private int level = 0;
     private int score = 0;
-    private int heart = 1;
+    private int heart = 3;
     private long time;
     private long goldTime;
     private boolean isGoldStatus = false;
@@ -387,6 +387,8 @@ public class GameModel {
 
     public boolean checkLevelCompletion() {
         if (destroyedBlockCount == initialBlockCount) {
+            System.out.println(destroyedBlockCount);
+            System.out.println(initialBlockCount);
             return true;
         }
         return false;
@@ -433,6 +435,7 @@ public class GameModel {
         this.setScore(loadSave.score);
         this.setHeart(loadSave.heart);
         this.setDestroyedBlockCount(loadSave.destroyedBlockCount);
+
         this.setTime(loadSave.time);
         this.setGoldTime(loadSave.goldTime);
         this.setGoldStatus(loadSave.isGoldStauts);

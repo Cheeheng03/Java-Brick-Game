@@ -3,9 +3,6 @@ package brickGame;
 import java.io.*;
 import java.util.ArrayList;
 
-import static brickGame.Main.savePath;
-import static brickGame.Main.savePathDir;
-
 public class LoadSave {
     public boolean          isExistHeartBlock;
     public boolean          isGoldStauts;

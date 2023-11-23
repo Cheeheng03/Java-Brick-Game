@@ -3,18 +3,8 @@ package brickGame;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
-import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.Pane;
-import javafx.scene.paint.ImagePattern;
-import javafx.scene.paint.Paint;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import java.util.*;
 import java.util.logging.Level;
@@ -25,37 +15,29 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     private final int sceneHeigt = 700;
     private static final int LEFT  = 1;
     private static final int RIGHT = 2;
-    private Circle ball;
-    private Rectangle rect;
     private long time     = 0;
     private GameEngine engine;
-    public static String savePath    = "C:/save/save.mdds";
-    public static String savePathDir = "C:/save/";
-    public  Pane             root;
-    private Label            scoreLabel;
-    private Label            heartLabel;
-    private Label            levelLabel;
     private boolean loadFromSave = false;
     private boolean isLevelTransitionInProgress = false;
     private static final Logger logger = Logger.getLogger(Main.class.getName());
     Stage  primaryStage;
-    Button load    = null;
-    Button newGame = null;
     private GameModel gameModel;
+    private GameView gameView;
 
     @Override
     public void start(Stage primaryStage) {
         System.out.println("Called");
         this.primaryStage = primaryStage;
 
+        gameView = new GameView();
         if (gameModel == null) {
             gameModel = new GameModel();
         }
-        createLabelsAndButtons();
-
+        gameView.initializeUI(gameModel, loadFromSave);
         initializeGameElements();
-        root = createRootPane();
-
+        gameView.addToRoot(gameModel, loadFromSave);
+        gameView.setSceneToStage(primaryStage);
+        primaryStage.getScene().setOnKeyPressed(this);
         if (!loadFromSave) {
             initializeGameButtons();
             setupButtonActions();
@@ -68,105 +50,44 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     private void initializeGameElements() {
         if (!loadFromSave) {
             gameModel.addToLevel(1);
-            updateLabels();
+            gameView.updateLabels(gameModel);
             if (gameModel.getLevel() == 18) {
-                new Score().showWin(this);
-                load.setVisible(false);
-                newGame.setVisible(false);
+                gameView.showWin();
+                gameView.setLevelButtonsVisibility(false);
                 return;
             }
             if (gameModel.getLevel() > 1 && gameModel.getLevel() <18) {
-                new Score().showMessage("Level Up :)", this);
+                gameView.showMessage("Level Up :)");
             }
-            if (gameModel.getLevel() == 1) {
-                load.setVisible(true);
-                newGame.setVisible(true);
-            } else {
-                load.setVisible(false);
-                newGame.setVisible(false);
-            }
+            gameView.setLevelButtonsVisibility(gameModel.getLevel() == 1);
 
-
-            initBreak();
-            initBall();
+            gameView.initBallAndPaddle(gameModel);
             gameModel.initBoard();
-
             gameModel.setInitialBlockCount(gameModel.getBlocks().size());
-            System.out.println(gameModel.getInitialBlockCount());
-            System.out.println(gameModel.getDestroyedBlockCount());
         } else{
-            updateLabels();
+            gameView.updateLabels(gameModel);
         }
     }
 
-    private void updateLabels() {
-        scoreLabel.setText("Score : " + gameModel.getScore());
-        heartLabel.setText("Heart : " + gameModel.getHeart());
-        levelLabel.setText("Level : " + gameModel.getLevel());
-    }
-
-    private Pane createRootPane() {
-        Pane root = new Pane();
-        root.getStyleClass().add("bgImageRoot");
-
-        if (!loadFromSave) {
-            root.getChildren().addAll(rect, ball, scoreLabel, heartLabel, levelLabel, newGame, load);
-        } else {
-            root.getChildren().addAll(rect, ball, scoreLabel, heartLabel, levelLabel);
-        }
-
-        for (Block block : gameModel.getBlocks()) {
-            root.getChildren().add(block.rect);
-        }
-
-        Scene scene = new Scene(root, sceneWidth, sceneHeigt);
-        scene.getStylesheets().add("style.css");
-        scene.setOnKeyPressed(this);
-
-        primaryStage.setTitle("Game");
-        primaryStage.setScene(scene);
-        primaryStage.show();
-
-        return root;
-    }
-
-    private void createLabelsAndButtons() {
-        scoreLabel = new Label("Score : ");
-        heartLabel = new Label("Heart : ");
-        levelLabel = new Label("Level : ");
-
-        levelLabel.setTranslateY(20);
-        heartLabel.setTranslateX(sceneWidth - 75);
-
-        load = new Button("Load Game");
-        newGame = new Button("Start New Game");
-        load.setTranslateX(220);
-        load.setTranslateY(300);
-        newGame.setTranslateX(220);
-        newGame.setTranslateY(340);
-    }
     private void initializeGameButtons() {
-        load.setOnAction(event -> {
+        gameView.getLoadButton().setOnAction(event -> {
             loadGame();
-            load.setVisible(false);
-            newGame.setVisible(false);
+            gameView.setLevelButtonsVisibility(false);
         });
 
-        newGame.setOnAction(event -> {
+        gameView.getNewGameButton().setOnAction(event -> {
             engine = new GameEngine();
             engine.setOnAction(Main.this);
             engine.setFps(120);
             engine.start();
 
-            load.setVisible(false);
-            newGame.setVisible(false);
+            gameView.setLevelButtonsVisibility(false);
         });
     }
 
     private void setupButtonActions() {
         if (gameModel.getLevel() > 1 && gameModel.getLevel() < 18) {
-            load.setVisible(false);
-            newGame.setVisible(false);
+            gameView.setLevelButtonsVisibility(false);
             startGameEngine();
         }
     }
@@ -205,7 +126,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 if ((gameModel.getPaddle().getX() <= 0 && direction == LEFT) || (gameModel.getPaddle().getX() >= (sceneWidth - gameModel.getPaddle().getWidth()) && direction == RIGHT)) {
                     return;
                 }
-
                 if (direction == RIGHT) {
                     gameModel.getPaddle().moveRight(sceneWidth);
                 } else if (direction == LEFT) {
@@ -225,27 +145,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         }).start();
     }
 
-    private void initBall() {
-        createBall();
-    }
-
-    private void createBall() {
-        ball = new Circle(gameModel.getGameball().getX(), gameModel.getGameball().getY(), gameModel.getGameball().getRadius(),new ImagePattern(new Image("ball.png")));
-    }
-
-    private void initBreak() {
-        rect = createBreakRectangle();
-        rect.setFill(createBreakFill());
-    }
-
-    private Rectangle createBreakRectangle() {
-        return new Rectangle(gameModel.getPaddle().getX(), gameModel.getPaddle().getY(), gameModel.getPaddle().getWidth(), gameModel.getPaddle().getHeight());
-    }
-
-    private Paint createBreakFill() {
-        return new ImagePattern(new Image("block.jpg"));
-    }
-
     private void setPhysicsToBall() {
         gameModel.setPhysicsToBall();
         if (gameModel.checkHeartDecrement()) {
@@ -254,9 +153,11 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     }
 
     private void handleGameEndScenario() {
-        new Score().show((double) sceneWidth / 2, (double) sceneHeigt / 2, -1, this);
+        gameView.show((double) sceneWidth / 2, (double) sceneHeigt / 2, -1);
+
         if (gameModel.getHeart() == 0) {
-            new Score().showGameOver(this);
+            //new Score().showGameOver(this);
+            gameView.showGameOver(restartAction);
             engine.stop();
         }
     }
@@ -265,13 +166,9 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         if (gameModel.getLevel() < 18 && gameModel.getHeart() > 0) {
             LoadSave loadSave = new LoadSave();
             loadSave.saveGameState(gameModel);
-            new Score().showMessage("Game Saved", Main.this);
+            gameView.showMessage("Game Saved");
         } else {
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Game Over");
-            alert.setHeaderText(null);
-            alert.setContentText("The game is over and cannot be saved.");
-            alert.showAndWait();
+            gameView.showGameOverAlert();
         }
     }
 
@@ -305,7 +202,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         }
     }
 
-    public void restartGame() {
+    Score.GameRestartAction restartAction = () -> {
         Platform.runLater(() -> {
             try {
                 gameModel.resetGameForRestart();
@@ -314,7 +211,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 handleException(e);
             }
         });
-    }
+    };
 
     @Override
     public void onUpdate() {
@@ -335,13 +232,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
     private void updateLabelsAndPosition() {
         Platform.runLater(() -> {
-            scoreLabel.setText("Score : " + gameModel.getScore());
-            heartLabel.setText("Heart : " + gameModel.getHeart());
-
-            rect.setX(gameModel.getPaddle().getX());
-            rect.setY(gameModel.getPaddle().getY());
-            ball.setCenterX(gameModel.getGameball().getX());
-            ball.setCenterY(gameModel.getGameball().getY());
+          gameView.updateLabelsAndBall(gameModel);
 
             for (Bonus choco : gameModel.getChocos()) {
                 choco.getChoco().setY(choco.getY());
@@ -351,32 +242,31 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
     private void updateUIAfterBlockRemoval() {
         for (Block block : gameModel.getBlocksToRemove()) {
-            Platform.runLater(() -> block.rect.setVisible(false ));
+            Platform.runLater(() -> gameView.setNotVisibleAfterBlockRemoval(block));
         }
     }
 
     private void updateBlockCollisionsUI() {
         for (Block block : gameModel.getBlocks()) {
             if (block.isDestroyed) {
-                new Score().show(block.x, block.y, 1, this);
+                //new Score().show(block.x, block.y, 1, this);
+                gameView.show(block.x, block.y, 1);
 
                 if (block.type == Block.BLOCK_CHOCO) {
                     final Bonus choco = new Bonus(block.row, block.column);
                     gameModel.addChoco(choco);
-                    Platform.runLater(() -> root.getChildren().add(choco.getChoco()));
+                    Platform.runLater(() -> gameView.addChocoUI(choco));
                 } else if (block.type == Block.BLOCK_STAR) {
                     Platform.runLater(() -> {
-                        ball.setFill(new ImagePattern(new Image("goldball.jpeg")));
-                        root.getStyleClass().remove("bgImageRoot");
-                        root.getStyleClass().add("goldRoot");
+                       gameView.addGoldRoot();
                     });
                 } else if (block.type == Block.BLOCK_HEART) {
-                    new Score().showMessage("Heart +1", this);
+                  //new Score().showMessage("Heart +1", this);
+                    gameView.showMessage("Heart +1");
                 }
             }
         }
     }
-
 
     @Override
     public void onInit() {
@@ -388,7 +278,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         setPhysicsToBall();
         gameModel.updateGoldStatus(time);
         if (!gameModel.getIsGoldStatus()) {
-            resetGoldStatusUI();
+            gameView.resetGoldStatusUI();
         }
 
         gameModel.updateChocos();
@@ -401,20 +291,13 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             Bonus choco = iterator.next();
             if (choco.isTaken()) {
                 choco.getChoco().setVisible(false);
-                new Score().show(choco.getX(), choco.getY(), 3, this);
+                gameView.show(choco.getX(), choco.getY(), 3);
                 System.out.println("You Got it and +3 score for you");
 
                 iterator.remove();
             }
         }
     }
-
-    private void resetGoldStatusUI() {
-        ball.setFill(new ImagePattern(new Image("ball.png")));
-        root.getStyleClass().remove("goldRoot");
-        root.getStyleClass().add("bgImageRoot");
-    }
-
 
     @Override
     public void onTime(long time) {
