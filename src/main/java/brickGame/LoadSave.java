@@ -31,6 +31,7 @@ public class LoadSave {
     public double           centerBreakX;
     public long             time;
     public long             goldTime;
+    public long             freezeTime;
     public double           vX;
     public double           xBallPrevious;
     public double           yBallPrevious;
@@ -58,6 +59,7 @@ public class LoadSave {
             outputStream.writeDouble(gameModel.getPaddle().getCenterBreakX());
             outputStream.writeLong(gameModel.getTime());
             outputStream.writeLong(gameModel.getGoldTime());
+            outputStream.writeLong(gameModel.getFreezeTime());
             outputStream.writeDouble(gameModel.getGameball().getVelocityX());
             outputStream.writeDouble(gameModel.getGameball().getVelocityY());
 
@@ -127,6 +129,7 @@ public class LoadSave {
             this.centerBreakX = inputStream.readDouble();
             this.time = inputStream.readLong();
             this.goldTime = inputStream.readLong();
+            this.freezeTime = inputStream.readLong();
             this.vX = inputStream.readDouble();
             this.vY = inputStream.readDouble();
 

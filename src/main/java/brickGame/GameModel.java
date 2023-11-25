@@ -13,6 +13,7 @@ public class GameModel {
     private int heart = 3;
     private long time;
     private long goldTime;
+    private long freezeTime;
     private boolean isGoldStatus = false;
     private int destroyedBlockCount;
     private int initialBlockCount;
@@ -84,6 +85,8 @@ public class GameModel {
             return determineHeartBlockType();
         } else if (randomNumber % 10 == 3) {
             return Block.BLOCK_STAR;
+        } else if (randomNumber % 10 == 4) {
+            return Block.BLOCK_FREEZE;
         } else {
             return Block.BLOCK_NORMAL;
         }
@@ -112,6 +115,7 @@ public class GameModel {
         colideToBottomLeftBlock = false;
         colideToBottomRightBlock = false;
     }
+
 
     public void setPhysicsToBall() {
         gameball.updatePosition();
@@ -208,6 +212,7 @@ public class GameModel {
         }
     }
 
+
     private void handleTopBlockCollision() {
         gameball.bounceUp();
     }
@@ -245,7 +250,7 @@ public class GameModel {
     }
 
     private void handleBottomLeftBlockCollision() {
-        if (gameball.isGoingDown()) {
+        if (gameball.isGoingDown()) {;
             gameball.bounceLeft();
         } else if (gameball.isGoingLeft()) {
             gameball.bounceDown();
@@ -264,21 +269,27 @@ public class GameModel {
         }
     }
 
+    private long lastHitTime = 0;
 
     public void updateBlockCollisions() {
+        if (time - lastHitTime > 5) {
             for (final Block block : blocks) {
-            int hitCode = block.checkHitToBlock(gameball.getX(), gameball.getY(), xBallPrevious, yBallPrevious, gameball.getRadius());
-            if (hitCode != Block.NO_HIT) {
-                addToScore(1);
-                block.isDestroyed = true;
-                blocksToRemove.add(block);
+                int hitCode = block.checkHitToBlock(gameball.getX(), gameball.getY(), xBallPrevious, yBallPrevious, gameball.getRadius());
+                if (hitCode != Block.NO_HIT) {
+                    lastHitTime = time;
+                    addToScore(1);
+                    block.isDestroyed = true;
+                    blocksToRemove.add(block);
 
-                handleSpecialBlock(block);
-                setCollisionFlags(hitCode);
-                setPhysicsToBall();
+                    handleSpecialBlock(block);
+                    setCollisionFlags(hitCode);
+                    setPhysicsToBall();
+                }
             }
         }
     }
+
+    private boolean isFreezeStatus = false;
 
     private void handleSpecialBlock(final Block block) {
         if (block.type == Block.BLOCK_CHOCO) {
@@ -289,6 +300,9 @@ public class GameModel {
             isGoldStatus = true;
         } else if (block.type == Block.BLOCK_HEART) {
             heart++;
+        } else if (block.type == Block.BLOCK_FREEZE) {
+            freezeTime = time;
+            isFreezeStatus = true;
         }
     }
 
@@ -331,14 +345,21 @@ public class GameModel {
         }
     }
 
-    public void updateGoldStatus(long currentTime) {
+    public void updateSpecialBlockStatus(long currentTime) {
         if (currentTime - goldTime > 5000) {
             resetGoldStatus();
+        }
+        if(currentTime - freezeTime > 3000){
+            resetFreezeStatus();
         }
     }
 
     private void resetGoldStatus() {
         isGoldStatus = false;
+    }
+
+    private void resetFreezeStatus() {
+        isFreezeStatus = false;
     }
 
     public void updateChocos() {
@@ -382,12 +403,7 @@ public class GameModel {
     }
 
     public boolean checkLevelCompletion() {
-        if (destroyedBlockCount == initialBlockCount) {
-            System.out.println(destroyedBlockCount);
-            System.out.println(initialBlockCount);
-            return true;
-        }
-        return false;
+        return destroyedBlockCount == initialBlockCount;
     }
 
     public void initializeNextLevel() {
@@ -396,10 +412,12 @@ public class GameModel {
         resetColideFlags();
         goDownBall = true;
         isGoldStatus = false;
+        isFreezeStatus = false;
         isExistHeartBlock = false;
         time = 0;
         goldTime = 0;
-        //lastHitTime = 0;
+        freezeTime = 0;
+        lastHitTime = 0;
     }
 
     public void resetGameElements() {
@@ -423,6 +441,7 @@ public class GameModel {
         isExistHeartBlock = false;
         time = 0;
         goldTime = 0;
+        freezeTime = 0;
         resetGameElements();
         resetBallForNewLevel();
     }
@@ -435,6 +454,7 @@ public class GameModel {
 
         this.setTime(loadSave.time);
         this.setGoldTime(loadSave.goldTime);
+        this.setFreezeTime(loadSave.freezeTime);
         this.setGoldStatus(loadSave.isGoldStauts);
         this.setIsExistHeartBlock(loadSave.isExistHeartBlock);
         this.setInitialBlockCount(loadSave.blocks.size() + loadSave.destroyedBlockCount);
@@ -484,6 +504,7 @@ public class GameModel {
         }
     }
 
+
     // Getter and setter methods
     public Ball getGameball() { return gameball; }
     public Paddle getPaddle() { return paddle; }
@@ -510,9 +531,16 @@ public class GameModel {
     public long getGoldTime() {
         return goldTime;
     }
+    public long getFreezeTime(){
+        return freezeTime;
+    }
 
     public boolean getIsGoldStatus() {
         return isGoldStatus;
+    }
+
+    public boolean getIsFreezeStatus(){
+        return isFreezeStatus;
     }
 
     public int getDestroyedBlockCount() {
@@ -621,6 +649,10 @@ public class GameModel {
 
     public void setGoldTime(long goldTime) {
         this.goldTime = goldTime;
+    }
+
+    public  void setFreezeTime(long freezeTime){
+        this.freezeTime = freezeTime;
     }
 
     public void setGoldStatus(boolean isGoldStatus) {

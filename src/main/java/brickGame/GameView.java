@@ -112,10 +112,18 @@ public class GameView {
         System.out.println("Gold Ball");
     }
 
+    public void addFreezeRoot(){
+        paddleRect.setFill(new ImagePattern(new Image("lockPaddle.jpg")));
+        System.out.println("Oh No! Paddle frozen for 3 seconds");
+    }
     public void resetGoldStatusUI() {
         ball.setFill(new ImagePattern(new Image("ball.png")));
         root.getStyleClass().remove("goldRoot");
         root.getStyleClass().add("bgImageRoot");
+    }
+
+    public void resetFreezeUI(){
+        paddleRect.setFill(new ImagePattern(new Image("block.jpg")));
     }
 
     public void showWin() {
