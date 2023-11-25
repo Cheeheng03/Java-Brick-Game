@@ -22,6 +22,7 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
     private static final int RIGHT = 2;
     private long time = 0;
     private boolean previousGoldStatus = false;
+    private boolean previousFreezeStatus = false;
     Stage  primaryStage;
     private static final Logger logger = Logger.getLogger(GameController.class.getName());
 
@@ -73,7 +74,7 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
 
             gameView.initBallAndPaddle(gameModel);
             gameModel.initBoard();
-            gameModel.setInitialBlockCount(gameModel.getBlocks().size());
+            gameModel. setInitialBlockCount(gameModel.getBlocks().size());
         } else{
             gameView.initBallAndPaddle(gameModel);
             gameView.updateLabels(gameModel);
@@ -112,15 +113,17 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
 
     @Override
     public void handle(KeyEvent event) {
-        if(event.getCode() == KeyCode.LEFT) {
-            move(LEFT);
-        } else if(event.getCode() == KeyCode.RIGHT) {
-            move(RIGHT);
+        if(!gameModel.getIsFreezeStatus()) {
+            if (event.getCode() == KeyCode.LEFT) {
+                move(LEFT);
+            } else if (event.getCode() == KeyCode.RIGHT) {
+                move(RIGHT);
 //        } else if(event.getCode() == KeyCode.DOWN) {
 //            //setPhysicsToBall(); // Assuming you have physics method for ball
 //        }
-        } else if(event.getCode() == KeyCode.S) {
-            saveGame();
+            } else if (event.getCode() == KeyCode.S) {
+                saveGame();
+            }
         }
     }
 
@@ -279,6 +282,10 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
                     });
                 } else if (block.type == Block.BLOCK_HEART) {
                     gameView.showMessage("Heart +1");
+                }   else if (block.type == Block.BLOCK_FREEZE) {
+                    Platform.runLater(() -> {
+                        gameView.addFreezeRoot();
+                    });
                 }
             }
         }
@@ -292,12 +299,19 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
     public void onPhysicsUpdate() {
         updateGameState();
         setPhysicsToBall();
-        gameModel.updateGoldStatus(time);
+
+        gameModel.updateSpecialBlockStatus(time);
+
         boolean currentGoldStatus = gameModel.getIsGoldStatus();
         if (!currentGoldStatus && previousGoldStatus) {
             gameView.resetGoldStatusUI();
         }
         previousGoldStatus = currentGoldStatus;
+        boolean currentFreezeStatus = gameModel.getIsFreezeStatus();
+        if (!currentGoldStatus && previousFreezeStatus) {
+            gameView.resetFreezeUI();
+        }
+        previousFreezeStatus = currentFreezeStatus;
 
         gameModel.updateChocos();
         updateChocoUI();
