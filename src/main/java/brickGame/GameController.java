@@ -79,6 +79,7 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
             gameView.initBallAndPaddle(gameModel);
             gameView.updateLabels(gameModel);
             updateGoldStatusUIOnLoad();
+            updateFreezeStatusUIOnLoad();
         }
     }
 
@@ -87,6 +88,14 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
             gameView.addGoldRoot();
         } else {
             gameView.resetGoldStatusUI();
+        }
+    }
+
+    private void updateFreezeStatusUIOnLoad() {
+        if (gameModel.getIsFreezeStatus()) {
+            gameView.addFreezeRoot();
+        } else {
+            gameView.resetFreezeUI();
         }
     }
 
@@ -117,6 +126,7 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
         engine = new GameEngine();
         engine.setOnAction(this);
         engine.setFps(120);
+        engine.setInitialTime(gameModel.getTime());
         engine.start();
     }
 
@@ -132,7 +142,6 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
 //        }
             }
         }
-
         if (event.getCode() == KeyCode.S) {
             saveGame();
         }
@@ -200,6 +209,7 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
             loadFromSave = true;
             gameView = null;
             gameView = new GameView();
+            onTime(gameModel.getTime());
             start(primaryStage);
         } catch (Exception e) {
             handleException(e);

@@ -12,7 +12,7 @@ public class GameModel {
     private int level = 0;
     private int score = 0;
     private int heart = 3;
-    private long time;
+    private long time = 0;
     private long goldTime;
     private long freezeTime;
     private int paddleTimeRemaining;
@@ -426,7 +426,7 @@ public class GameModel {
             public void run() {
                 if (paddleTimeRemaining > 0) {
                     paddleTimeRemaining--;
-                    System.out.println(paddleTimeRemaining);
+                    System.out.println("Paddle Time Remaining" + paddleTimeRemaining);
                 } else {
                     paddle.resetWidth();
                     paddleWidthChanged = true;
@@ -481,6 +481,7 @@ public class GameModel {
         time = 0;
         goldTime = 0;
         freezeTime = 0;
+        paddleTimeRemaining = 0;
         lastHitTime = 0;
     }
 
@@ -507,6 +508,7 @@ public class GameModel {
         time = 0;
         goldTime = 0;
         freezeTime = 0;
+        paddleTimeRemaining = 0;
         resetGameElements();
         resetBallForNewLevel();
     }

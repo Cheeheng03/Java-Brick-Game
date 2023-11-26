@@ -6,6 +6,7 @@
         private double centerBreakX;
         private int width;
         private final int height;
+        private final int originalWidth = 130;
 
         public Paddle() {
             this.x = 0.0f;
@@ -15,18 +16,18 @@
         }
 
         public void increaseWidth() {
-            this.width += 50;
+            this.width =  180;
         }
 
         public void decreaseWidth() {
-            this.width -= 50;
+            this.width = 80;
         }
 
         public void setWidth(int width){
             this.width = width;
         }
         public void resetWidth() {
-            this.width = 130;
+            this.width = originalWidth;
         }
 
         public void moveRight(int sceneWidth) {
@@ -40,6 +41,10 @@
         // Getters and Setters
         public double getX() {
             return x;
+        }
+
+        public int getOriginalWidth(){
+            return originalWidth;
         }
 
         public void setX(double x) {

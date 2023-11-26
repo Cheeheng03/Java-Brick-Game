@@ -111,12 +111,6 @@ public class GameView {
         root.getStyleClass().remove("bgImageRoot");
         root.getStyleClass().add("goldRoot");
         System.out.println("Gold Ball");
-
-        System.out.println("Style classes in root:");
-        for (String styleClass : root.getStyleClass()) {
-            System.out.println(" - " + styleClass);
-        }
-
     }
 
     public void addFreezeRoot(){
