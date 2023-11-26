@@ -4,7 +4,7 @@
         private double x;
         private double y;
         private double centerBreakX;
-        private final int width;
+        private int width;
         private final int height;
 
         public Paddle() {
@@ -12,6 +12,21 @@
             this.y = 640.0f;
             this.width = 130;
             this.height = 30;
+        }
+
+        public void increaseWidth() {
+            this.width += 50;
+        }
+
+        public void decreaseWidth() {
+            this.width -= 50;
+        }
+
+        public void setWidth(int width){
+            this.width = width;
+        }
+        public void resetWidth() {
+            this.width = 130;
         }
 
         public void moveRight(int sceneWidth) {

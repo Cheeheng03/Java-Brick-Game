@@ -1,5 +1,6 @@
 package brickGame;
 
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -101,8 +102,8 @@ public class GameView {
         block.rect.setVisible(false);
     }
 
-    public void addChocoUI(Bonus choco){
-        root.getChildren().add(choco.getChoco());
+    public void addBonusUI(Bonus bonus){
+        root.getChildren().add(bonus.getBonus());
     }
     public void addGoldRoot(){
         ball.setFill(new ImagePattern(new Image("goldball.jpeg")));
@@ -110,12 +111,20 @@ public class GameView {
         root.getStyleClass().remove("bgImageRoot");
         root.getStyleClass().add("goldRoot");
         System.out.println("Gold Ball");
+
+        System.out.println("Style classes in root:");
+        for (String styleClass : root.getStyleClass()) {
+            System.out.println(" - " + styleClass);
+        }
+
     }
 
     public void addFreezeRoot(){
+        ball.setFill(new ImagePattern(new Image("iceBall.jpeg")));
         paddleRect.setFill(new ImagePattern(new Image("lockPaddle.jpg")));
         System.out.println("Oh No! Paddle frozen for 3 seconds");
     }
+
     public void resetGoldStatusUI() {
         ball.setFill(new ImagePattern(new Image("ball.png")));
         root.getStyleClass().remove("goldRoot");
@@ -123,7 +132,15 @@ public class GameView {
     }
 
     public void resetFreezeUI(){
+        ball.setFill(new ImagePattern(new Image("ball.png")));
         paddleRect.setFill(new ImagePattern(new Image("block.jpg")));
+    }
+
+    public void updatePaddleUI(GameModel gameModel){
+        Paddle paddle = gameModel.getPaddle();
+        paddleRect.setX(paddle.getX());
+        paddleRect.setY(paddle.getY());
+        paddleRect.setWidth(paddle.getWidth());
     }
 
     public void showWin() {

@@ -78,6 +78,15 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
         } else{
             gameView.initBallAndPaddle(gameModel);
             gameView.updateLabels(gameModel);
+            updateGoldStatusUIOnLoad();
+        }
+    }
+
+    private void updateGoldStatusUIOnLoad() {
+        if (gameModel.getIsGoldStatus()) {
+            gameView.addGoldRoot();
+        } else {
+            gameView.resetGoldStatusUI();
         }
     }
 
@@ -121,9 +130,11 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
 //        } else if(event.getCode() == KeyCode.DOWN) {
 //            //setPhysicsToBall(); // Assuming you have physics method for ball
 //        }
-            } else if (event.getCode() == KeyCode.S) {
-                saveGame();
             }
+        }
+
+        if (event.getCode() == KeyCode.S) {
+            saveGame();
         }
     }
 
@@ -166,7 +177,6 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
         gameView.show((double) sceneWidth / 2, (double) sceneHeight / 2, -1);
 
         if (gameModel.getHeart() == 0) {
-            //new Score().showGameOver(this);
             gameView.showGameOver(restartAction);
             engine.stop();
         }
@@ -256,7 +266,10 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
             gameView.updateLabelsAndBall(gameModel);
 
             for (Bonus choco : gameModel.getChocos()) {
-                choco.getChoco().setY(choco.getY());
+                choco.getBonus().setY(choco.getY());
+            }
+            for (Bonus mystery : gameModel.getMysteries()) {
+                mystery.getBonus().setY(mystery.getY());
             }
         });
     }
@@ -273,19 +286,23 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
                 gameView.show(block.x, block.y, 1);
 
                 if (block.type == Block.BLOCK_CHOCO) {
-                    final Bonus choco = new Bonus(block.row, block.column);
+                    final Bonus choco = new Bonus(block.row, block.column, Block.BLOCK_CHOCO);
                     gameModel.addChoco(choco);
-                    Platform.runLater(() -> gameView.addChocoUI(choco));
+                    Platform.runLater(() -> gameView.addBonusUI(choco));
                 } else if (block.type == Block.BLOCK_STAR) {
                     Platform.runLater(() -> {
                         gameView.addGoldRoot();
                     });
                 } else if (block.type == Block.BLOCK_HEART) {
                     gameView.showMessage("Heart +1");
-                }   else if (block.type == Block.BLOCK_FREEZE) {
+                } else if (block.type == Block.BLOCK_FREEZE) {
                     Platform.runLater(() -> {
                         gameView.addFreezeRoot();
                     });
+                } else if (block.type == Block.BLOCK_MYSTERY) {
+                    final Bonus mystery = new Bonus(block.row, block.column, Block.BLOCK_MYSTERY);
+                    gameModel.addMystery(mystery);
+                    Platform.runLater(() -> gameView.addBonusUI(mystery));
                 }
             }
         }
@@ -307,14 +324,21 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
             gameView.resetGoldStatusUI();
         }
         previousGoldStatus = currentGoldStatus;
+
         boolean currentFreezeStatus = gameModel.getIsFreezeStatus();
-        if (!currentGoldStatus && previousFreezeStatus) {
+        if (!currentFreezeStatus && previousFreezeStatus) {
             gameView.resetFreezeUI();
         }
         previousFreezeStatus = currentFreezeStatus;
 
-        gameModel.updateChocos();
+        if (gameModel.isPaddleWidthChanged()) {
+            gameView.updatePaddleUI(gameModel);
+            gameModel.setPaddleWidthChanged(false);
+        }
+
+        gameModel.updateBonusBlocks();
         updateChocoUI();
+        updateMysteryUI();
     }
 
     private void updateChocoUI() {
@@ -322,9 +346,21 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
         while (iterator.hasNext()) {
             Bonus choco = iterator.next();
             if (choco.isTaken()) {
-                choco.getChoco().setVisible(false);
+                choco.getBonus().setVisible(false);
                 gameView.show(choco.getX(), choco.getY(), 3);
                 System.out.println("You Got it and +3 score for you");
+                iterator.remove();
+            }
+        }
+    }
+
+    private void updateMysteryUI() {
+        Iterator<Bonus> iterator = gameModel.getMysteries().iterator();
+        while (iterator.hasNext()) {
+            Bonus mystery = iterator.next();
+            if (mystery.isTaken()) {
+                mystery.getBonus().setVisible(false);
+                System.out.println("You Got the mystery gift");
                 iterator.remove();
             }
         }
