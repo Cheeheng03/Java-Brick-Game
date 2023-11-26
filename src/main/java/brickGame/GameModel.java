@@ -7,13 +7,15 @@ public class GameModel {
     private Paddle paddle;
     private ArrayList<Block> blocks = new ArrayList<Block>();
     private ArrayList<Bonus> chocos = new ArrayList<Bonus>();
+    private ArrayList<Bonus> mysteryBlocks = new ArrayList<Bonus>();
     private Queue<Block> blocksToRemove;
     private int level = 0;
     private int score = 0;
     private int heart = 3;
-    private long time;
+    private long time = 0;
     private long goldTime;
     private long freezeTime;
+    private int paddleTimeRemaining;
     private boolean isGoldStatus = false;
     private int destroyedBlockCount;
     private int initialBlockCount;
@@ -43,6 +45,7 @@ public class GameModel {
         this.gameball = initBall();
         this.blocks = new ArrayList<>();
         this.chocos = new ArrayList<>();
+        this.mysteryBlocks = new ArrayList<>();
         this.blocksToRemove = new LinkedList<>();
     }
 
@@ -68,7 +71,7 @@ public class GameModel {
             for (int j = 0; j < level + 1; j++) {
                 int randomNumber = random.nextInt(500);
 
-                if (randomNumber % 5 == 0) {
+                if (randomNumber % 6 == 0) {
                     continue;
                 }
 
@@ -87,6 +90,8 @@ public class GameModel {
             return Block.BLOCK_STAR;
         } else if (randomNumber % 10 == 4) {
             return Block.BLOCK_FREEZE;
+        } else if (randomNumber % 10 == 5) {
+            return Block.BLOCK_MYSTERY;
         } else {
             return Block.BLOCK_NORMAL;
         }
@@ -293,7 +298,7 @@ public class GameModel {
 
     private void handleSpecialBlock(final Block block) {
         if (block.type == Block.BLOCK_CHOCO) {
-            final Bonus choco = new Bonus(block.row, block.column);
+            final Bonus choco = new Bonus(block.row, block.column, Block.BLOCK_CHOCO);
             choco.timeCreated = time;
         } else if (block.type == Block.BLOCK_STAR) {
             goldTime = time;
@@ -303,6 +308,9 @@ public class GameModel {
         } else if (block.type == Block.BLOCK_FREEZE) {
             freezeTime = time;
             isFreezeStatus = true;
+        } else if (block.type == Block.BLOCK_MYSTERY) {
+            final Bonus mystery = new Bonus(block.row, block.column, Block.BLOCK_MYSTERY);
+            mystery.timeCreated = time;
         }
     }
 
@@ -362,44 +370,100 @@ public class GameModel {
         isFreezeStatus = false;
     }
 
-    public void updateChocos() {
-        for (Bonus choco : chocos) {
-            if (shouldSkipChoco(choco)) {
+    public void updateBonusBlocks(){
+        handleBonusUpdates(chocos);
+        handleBonusUpdates(mysteryBlocks);
+    }
+    public void handleBonusUpdates(List<Bonus> bonuses) {
+        for (Bonus bonus : bonuses) {
+            if (shouldSkipBonus(bonus)) {
                 continue;
             }
-            if (handleChocoCollision(choco)) {
-                processChocoCollision(choco);
+            if (handleBonusCollision(bonus)) {
+                processBonusCollision(bonus );
             }
-            updateChocoPosition(choco);
+            updateBonusPosition(bonus);
         }
     }
 
-    public boolean shouldSkipChoco(Bonus choco) {
-        return choco.getY() > sceneHeight || choco.isTaken();
+    public boolean shouldSkipBonus(Bonus bonus) {
+        return bonus.getY() > sceneHeight || bonus.isTaken();
     }
 
-    public boolean handleChocoCollision(Bonus choco) {
-        return choco.getY() >= paddle.getY() && choco.getY() <= paddle.getY() + paddle.getHeight()
-                && choco.getX() >= paddle.getX() && choco.getX() <= paddle.getX() + paddle.getWidth();
+    public boolean handleBonusCollision(Bonus bonus) {
+        return bonus.getY() >= paddle.getY() && bonus.getY() <= paddle.getY() + paddle.getHeight()
+                && bonus.getX() >= paddle.getX() && bonus.getX() <= paddle.getX() + paddle.getWidth();
     }
 
-    public void processChocoCollision(Bonus choco) {
-        choco.setTaken(true);
-        addToScore(3);
+    private boolean paddleWidthChanged = false;
+
+    public void processBonusCollision(Bonus bonus) {
+        bonus.setTaken(true);
+        int type = bonus.getType();
+        if (type == Block.BLOCK_CHOCO) {
+            addToScore(3);
+        } else if (type == Block.BLOCK_MYSTERY) {
+            Random random = new Random();
+            boolean increaseWidth = random.nextBoolean();
+
+            if (increaseWidth) {
+                paddle.increaseWidth();
+                System.out.println("Congrats! The paddle width has expanded for 10 seconds");
+            } else {
+                paddle.decreaseWidth();
+                System.out.println("Oh No! The paddle width has shrunken for 10 seconds");
+            }
+
+            paddleWidthChanged = true;
+            paddleTimeRemaining = 10;
+            processPaddleBonus();
+        }
     }
 
-    public void updateChocoPosition(Bonus choco) {
-        long elapsedTime = time - choco.getTimeCreated();
+    private void processPaddleBonus(){
+        new Timer().scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                if (paddleTimeRemaining > 0) {
+                    paddleTimeRemaining--;
+                    System.out.println("Paddle Time Remaining" + paddleTimeRemaining);
+                } else {
+                    paddle.resetWidth();
+                    paddleWidthChanged = true;
+                    this.cancel();
+                }
+            }
+        }, 0, 1000);
+    }
+
+    public int getPaddleTimeRemaining() {
+        return paddleTimeRemaining;
+    }
+
+    public void setPaddleTimeRemaining(int paddleTimeRemaining){
+        this.paddleTimeRemaining = paddleTimeRemaining;
+    }
+
+    public boolean isPaddleWidthChanged() {
+        return paddleWidthChanged;
+    }
+
+    public void setPaddleWidthChanged(boolean changed) {
+        this.paddleWidthChanged = changed;
+    }
+
+    public void updateBonusPosition(Bonus bonus) {
+        long elapsedTime = time - bonus.getTimeCreated();
         double fallingSpeed = 0.05;
 
         // Calculate the new Y position based on the elapsed time and falling speed
-        long newY = (long) (choco.getY() + fallingSpeed * elapsedTime);
+        long newY = (long) (bonus.getY() + fallingSpeed * elapsedTime);
 
         if (newY > sceneHeight) {
             newY = sceneHeight;
         }
 
-        choco.updateY(newY);
+        bonus.updateY(newY);
     }
 
     public boolean checkLevelCompletion() {
@@ -417,12 +481,14 @@ public class GameModel {
         time = 0;
         goldTime = 0;
         freezeTime = 0;
+        paddleTimeRemaining = 0;
         lastHitTime = 0;
     }
 
     public void resetGameElements() {
         blocks.clear();
         chocos.clear();
+        mysteryBlocks.clear();;
         destroyedBlockCount = 0;
     }
 
@@ -442,6 +508,7 @@ public class GameModel {
         time = 0;
         goldTime = 0;
         freezeTime = 0;
+        paddleTimeRemaining = 0;
         resetGameElements();
         resetBallForNewLevel();
     }
@@ -455,7 +522,11 @@ public class GameModel {
         this.setTime(loadSave.time);
         this.setGoldTime(loadSave.goldTime);
         this.setFreezeTime(loadSave.freezeTime);
+
         this.setGoldStatus(loadSave.isGoldStauts);
+        this.setIsFreezeStatus(loadSave.isFreezeStatus);
+        this.setPaddleWidthChanged(loadSave.isPaddleChanged);
+        this.setPaddleTimeRemaining(loadSave.paddleTimeRemaining);
         this.setIsExistHeartBlock(loadSave.isExistHeartBlock);
         this.setInitialBlockCount(loadSave.blocks.size() + loadSave.destroyedBlockCount);
 
@@ -466,12 +537,14 @@ public class GameModel {
         gameball.setVelocityX(loadSave.vX);
         gameball.setVelocityY(loadSave.vY);
 
+        Paddle paddle = this.getPaddle();
+        paddle.setWidth(loadSave.paddleWidth);
+        processPaddleBonus();
         // Setting previous ball position
         this.setXBallPrevious(loadSave.xBallPrevious);
         this.setYBallPrevious(loadSave.yBallPrevious);
 
         // Setting paddle state
-        Paddle paddle = this.getPaddle();
         paddle.setX(loadSave.xBreak);
         paddle.setY(loadSave.yBreak);
         paddle.setCenterBreakX(loadSave.centerBreakX);
@@ -511,6 +584,10 @@ public class GameModel {
     public ArrayList<Block> getBlocks() { return blocks; }
     public void addBlock(Block block) { blocks.add(block); }
     public void addChoco(Bonus choco) { chocos.add(choco); }
+
+    public void addMystery(Bonus mysteryBlock){
+        mysteryBlocks.add(mysteryBlock);
+    }
 
     public int getLevel() {
         return level;
@@ -566,9 +643,14 @@ public class GameModel {
         return chocos;
     }
 
+    public List<Bonus> getMysteries(){
+        return mysteryBlocks;
+    }
+
     public Queue<Block> getBlocksToRemove() {
         return blocksToRemove;
     }
+
     public boolean isColideToBreak() {
         return colideToBreak;
     }
@@ -669,6 +751,10 @@ public class GameModel {
 
     public void setReadyForNextLevel(boolean ready) {
         this.readyForNextLevel = ready;
+    }
+
+    public void setIsFreezeStatus(boolean isFreezeStatus){
+        this.isFreezeStatus = isFreezeStatus;
     }
 
     public void setColideToBreak(boolean colideToBreak) {

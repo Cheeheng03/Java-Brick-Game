@@ -47,7 +47,7 @@ public class Block implements Serializable {
     public static int BLOCK_STAR = 101;
     public static int BLOCK_HEART = 102;
     public static int BLOCK_FREEZE = 103;
-
+    public static int BLOCK_MYSTERY = 104;
 
     public Block(int row, int column, int type) {
         this.row = row;
@@ -58,16 +58,13 @@ public class Block implements Serializable {
     }
 
     private void draw() {
-        //int paddingBetweenBlocks = 4; // This value can be changed to whatever suits your needs
-
-
         x = (column * width) + paddingH;
         y = (row * height) + paddingTop;
 
         rect = new Rectangle();
-        rect.setWidth(width); // Width of the block remains the same
-        rect.setHeight(height); // Height of the block remains the same
-        rect.setX(x); // Set the X position including the horizontal padding
+        rect.setWidth(width);
+        rect.setHeight(height);
+        rect.setX(x);
         rect.setY(y);
 
         if (type == BLOCK_CHOCO) {
@@ -84,6 +81,10 @@ public class Block implements Serializable {
             rect.setFill(pattern);
         } else if (type == BLOCK_FREEZE) {
             Image image = new Image("freeze.jpg");
+            ImagePattern pattern = new ImagePattern(image);
+            rect.setFill(pattern);
+        } else if (type == BLOCK_MYSTERY) {
+            Image image = new Image("mystery.jpg");
             ImagePattern pattern = new ImagePattern(image);
             rect.setFill(pattern);
         } else {

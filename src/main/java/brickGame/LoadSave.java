@@ -32,6 +32,10 @@ public class LoadSave {
     public long             time;
     public long             goldTime;
     public long             freezeTime;
+    public boolean          isPaddleChanged;
+    public boolean          isFreezeStatus;
+    public int              paddleTimeRemaining;
+    public int              paddleWidth;
     public double           vX;
     public double           xBallPrevious;
     public double           yBallPrevious;
@@ -60,12 +64,16 @@ public class LoadSave {
             outputStream.writeLong(gameModel.getTime());
             outputStream.writeLong(gameModel.getGoldTime());
             outputStream.writeLong(gameModel.getFreezeTime());
+            outputStream.writeBoolean(gameModel.isPaddleWidthChanged());
+            outputStream.writeInt(gameModel.getPaddle().getWidth());
+            outputStream.writeInt(gameModel.getPaddleTimeRemaining());
             outputStream.writeDouble(gameModel.getGameball().getVelocityX());
             outputStream.writeDouble(gameModel.getGameball().getVelocityY());
 
             // Saving boolean flags
             outputStream.writeBoolean(gameModel.getIsExistHeartBlock());
             outputStream.writeBoolean(gameModel.getIsGoldStatus());
+            outputStream.writeBoolean(gameModel.getIsFreezeStatus());
             outputStream.writeBoolean(gameModel.getGameball().isGoingDown());
             outputStream.writeBoolean(gameModel.getGameball().isGoingRight());
             // Save all collision flags
@@ -109,16 +117,9 @@ public class LoadSave {
         try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(new File(savePath)))) {
 
             this.level = inputStream.readInt();
-            System.out.println("Level: " + this.level);
-
             this.score = inputStream.readInt();
-            System.out.println("Score: " + this.score);
-
             this.heart = inputStream.readInt();
-            System.out.println("Heart: " + this.heart);
-
             this.destroyedBlockCount = inputStream.readInt();
-            System.out.println("Destroyed Block Count: " + this.destroyedBlockCount);
 
             this.xBall = inputStream.readDouble();
             this.yBall = inputStream.readDouble();
@@ -130,11 +131,15 @@ public class LoadSave {
             this.time = inputStream.readLong();
             this.goldTime = inputStream.readLong();
             this.freezeTime = inputStream.readLong();
+            this.isPaddleChanged = inputStream.readBoolean();
+            this.paddleWidth = inputStream.readInt();
+            this.paddleTimeRemaining = inputStream.readInt();
             this.vX = inputStream.readDouble();
             this.vY = inputStream.readDouble();
 
             this.isExistHeartBlock = inputStream.readBoolean();
             this.isGoldStauts = inputStream.readBoolean();
+            this.isFreezeStatus = inputStream.readBoolean();
             this.goDownBall = inputStream.readBoolean();
             this.goRightBall = inputStream.readBoolean();
             this.colideToBreak = inputStream.readBoolean();

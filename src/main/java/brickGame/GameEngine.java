@@ -19,7 +19,6 @@ public class GameEngine {
     }
 
     public void setFps(int fps) {
-        // Convert frames per second to duration in milliseconds for KeyFrame
         this.frameTimeDuration = Duration.millis(1000 / fps);
     }
 
@@ -27,8 +26,11 @@ public class GameEngine {
         onAction.onInit();
     }
 
+    public void setInitialTime(long initialTime) {
+        this.time = initialTime;
+    }
+
     public void start() {
-        time = 0;
         isStopped = false;
         initialize();
         startUpdateTimeline();
