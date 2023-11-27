@@ -6,7 +6,9 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
@@ -16,6 +18,8 @@ public class GameView {
     private final int sceneWidth = 500;
     private final int sceneHeight = 700;
     private Pane root;
+    private Pane mainMenuPane;
+    private ImageView backgroundImageView;
     private Circle ball;
     private Rectangle paddleRect;
     private Label scoreLabel;
@@ -41,14 +45,14 @@ public class GameView {
         levelLabel.setTranslateY(20);
         heartLabel.setTranslateX(sceneWidth - 75);
 
-        loadButton = new Button("Load Game");
-        newGameButton = new Button("Start New Game");
+        //loadButton = new Button("Load Game");
+        //newGameButton = new Button("Start New Game");
         pauseButton = new Button("\u23F8");
 
-        loadButton.setTranslateX(220);
-        loadButton.setTranslateY(300);
-        newGameButton.setTranslateX(220);
-        newGameButton.setTranslateY(340);
+//        loadButton.setTranslateX(220);
+//        loadButton.setTranslateY(300);
+//        newGameButton.setTranslateX(220);
+//        newGameButton.setTranslateY(340);
         pauseButton.setTranslateX(240);
         pauseButton.setTranslateY(0);
 
@@ -62,10 +66,38 @@ public class GameView {
 
     }
 
+    public void initializeMainMenu() {
+        mainMenuPane = new Pane();
+
+        Image backgroundImage = new Image("mainBG.png");
+        backgroundImageView = new ImageView(backgroundImage);
+        backgroundImageView.setFitWidth(sceneWidth);
+        backgroundImageView.setFitHeight(sceneHeight);
+
+        loadButton = new Button("Load Game");
+        newGameButton = new Button("Start New Game");
+
+        loadButton.setStyle("-fx-background-color: #0e3958; -fx-text-fill: #ffeb97;");
+        newGameButton.setStyle("-fx-background-color: #0e3958; -fx-text-fill: #ffeb97;");
+
+        loadButton.setMinSize(150, 40);
+        newGameButton.setMinSize(150, 40);
+
+        loadButton.setTextFill(Color.WHITE);
+        newGameButton.setTextFill(Color.WHITE);
+
+        loadButton.setTranslateX(175);
+        loadButton.setTranslateY(340);
+        newGameButton.setTranslateX(175);
+        newGameButton.setTranslateY(400);
+
+        mainMenuPane.getChildren().addAll(backgroundImageView, loadButton, newGameButton);
+    }
+
     public void addToRoot(GameModel gameModel, boolean loadFromSave){
         root.getChildren().clear();
         if (!loadFromSave) {
-            root.getChildren().addAll(paddleRect, ball, scoreLabel, heartLabel, levelLabel, newGameButton, loadButton, pauseButton);
+            root.getChildren().addAll(paddleRect, ball, scoreLabel, heartLabel, levelLabel, pauseButton);
         } else {
             root.getChildren().addAll(paddleRect, ball, scoreLabel, heartLabel, levelLabel, pauseButton);
         }
@@ -81,8 +113,19 @@ public class GameView {
         levelLabel.setText("Level : " + gameModel.getLevel());
     }
 
+    public void changeSceneToGame(Stage stage) {
+        Scene currentScene = stage.getScene();
+        if (currentScene != null) {
+            currentScene.setRoot(root);
+        } else {
+            currentScene = new Scene(root, sceneWidth, sceneHeight);
+            currentScene.getStylesheets().add("style.css");
+            stage.setScene(currentScene);
+        }
+    }
+
     public void setSceneToStage(Stage stage) {
-        Scene scene = new Scene(root, sceneWidth, sceneHeight);
+        Scene scene = new Scene(mainMenuPane, sceneWidth, sceneHeight);
         scene.getStylesheets().add("style.css");
         stage.setScene(scene);
         stage.show();
