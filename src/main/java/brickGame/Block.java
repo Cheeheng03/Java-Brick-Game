@@ -48,6 +48,8 @@ public class Block implements Serializable {
     public static int BLOCK_HEART = 102;
     public static int BLOCK_FREEZE = 103;
     public static int BLOCK_MYSTERY = 104;
+    public static int BLOCK_WALL = 105;
+    public static int Block_GHOST= 106;
 
     public Block(int row, int column, int type) {
         this.row = row;
@@ -87,6 +89,14 @@ public class Block implements Serializable {
             Image image = new Image("mystery.jpg");
             ImagePattern pattern = new ImagePattern(image);
             rect.setFill(pattern);
+        } else if (type == BLOCK_WALL) {
+            Image image = new Image("bedrock.jpg");
+            ImagePattern pattern = new ImagePattern(image);
+            rect.setFill(pattern);
+        } else if (type == Block_GHOST) {
+            Image image = new Image("ghost.jpg");
+            ImagePattern pattern = new ImagePattern(image);
+            rect.setFill(pattern);
         } else {
             int imageIndex = new Random().nextInt(3);
             String imageName = "brick" + (imageIndex + 1) + ".jpg";
@@ -118,16 +128,12 @@ public class Block implements Serializable {
         }
 
         if (Math.abs(xBall - x) <= ballRadius + Epsilon && Math.abs(yBall - y) <= ballRadius + Epsilon) {
-            //System.out.println("Hit Top Left Corner");
             return HIT_TOP_LEFT;
         } else if (Math.abs(xBall - (x + width)) <= ballRadius + Epsilon && Math.abs(yBall - y) <= ballRadius + Epsilon) {
-            //System.out.println("Hit Top Right Corner");
             return HIT_TOP_RIGHT;
         } else if (Math.abs(xBall - x) <= ballRadius + Epsilon && Math.abs(yBall - (y + height)) <= ballRadius + Epsilon) {
-            //System.out.println("Hit Bottom Left Corner");
             return HIT_BOTTOM_LEFT;
         } else if (Math.abs(xBall - (x + width)) <= ballRadius + Epsilon && Math.abs(yBall - (y + height)) <= ballRadius + Epsilon) {
-            //System.out.println("Hit Bottom Right Corner");
             return HIT_BOTTOM_RIGHT;
         }
 
@@ -141,34 +147,26 @@ public class Block implements Serializable {
 
             if (dx + Epsilon < dy) {
                 if (xBall < x + (double) width / 2) {
-                    //System.out.println("Hit Left");
                     return HIT_LEFT;
                 } else {
-                    //System.out.println("Hit Right");
                     return HIT_RIGHT;
                 }
             } else if (dx > dy + Epsilon) {
                 if (yBall < y + (double) height / 2) {
-                   // System.out.println("Hit Top");
                     return HIT_TOP;
                 } else {
-                    //System.out.println("Hit Bottom");
                     return HIT_BOTTOM;
                 }
             }
         } else {
             // Previous position comparisons considering epsilon to detect edge crossing
             if (xBallPrevious + ballRadius + Epsilon < x && xBall >= x) {
-                //System.out.println("HIT LEFT SIDE VIA PREVIOUS");
                 return HIT_LEFT;
             } else if (xBallPrevious - ballRadius - Epsilon > x + width && xBall <= x + width) {
-                //System.out.println("HIT RIGHT SIDE VIA PREVIOUS");
                 return HIT_RIGHT;
             } else if (yBallPrevious + ballRadius + Epsilon < y && yBall >= y) {
-                //System.out.println("HIT TOP SIDE VIA PREVIOUS");
                 return HIT_TOP;
             } else if (yBallPrevious - ballRadius - Epsilon > y + height && yBall <= y + height) {
-               // System.out.println("HIT BOTTOM SIDE VIA PREVIOUS");
                 return HIT_BOTTOM;
             }
         }

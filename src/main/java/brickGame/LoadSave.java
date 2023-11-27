@@ -32,8 +32,10 @@ public class LoadSave {
     public long             time;
     public long             goldTime;
     public long             freezeTime;
+    public long             ghostTime;
     public boolean          isPaddleChanged;
     public boolean          isFreezeStatus;
+    public boolean          isGhostStatus;
     public int              paddleTimeRemaining;
     public int              paddleWidth;
     public double           vX;
@@ -64,6 +66,7 @@ public class LoadSave {
             outputStream.writeLong(gameModel.getTime());
             outputStream.writeLong(gameModel.getGoldTime());
             outputStream.writeLong(gameModel.getFreezeTime());
+            outputStream.writeLong(gameModel.getGhostTime());
             outputStream.writeBoolean(gameModel.isPaddleWidthChanged());
             outputStream.writeInt(gameModel.getPaddle().getWidth());
             outputStream.writeInt(gameModel.getPaddleTimeRemaining());
@@ -74,6 +77,7 @@ public class LoadSave {
             outputStream.writeBoolean(gameModel.getIsExistHeartBlock());
             outputStream.writeBoolean(gameModel.getIsGoldStatus());
             outputStream.writeBoolean(gameModel.getIsFreezeStatus());
+            outputStream.writeBoolean(gameModel.getIsGhostStatus());
             outputStream.writeBoolean(gameModel.getGameball().isGoingDown());
             outputStream.writeBoolean(gameModel.getGameball().isGoingRight());
             // Save all collision flags
@@ -131,6 +135,7 @@ public class LoadSave {
             this.time = inputStream.readLong();
             this.goldTime = inputStream.readLong();
             this.freezeTime = inputStream.readLong();
+            this.ghostTime = inputStream.readLong();
             this.isPaddleChanged = inputStream.readBoolean();
             this.paddleWidth = inputStream.readInt();
             this.paddleTimeRemaining = inputStream.readInt();
@@ -140,8 +145,10 @@ public class LoadSave {
             this.isExistHeartBlock = inputStream.readBoolean();
             this.isGoldStauts = inputStream.readBoolean();
             this.isFreezeStatus = inputStream.readBoolean();
+            this.isGhostStatus = inputStream.readBoolean();
             this.goDownBall = inputStream.readBoolean();
             this.goRightBall = inputStream.readBoolean();
+
             this.colideToBreak = inputStream.readBoolean();
             this.colideToBreakAndMoveToRight = inputStream.readBoolean();
             this.colideToRightWall = inputStream.readBoolean();

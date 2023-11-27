@@ -174,6 +174,9 @@ public class GameView {
         System.out.println("Oh No! Paddle frozen for 3 seconds");
     }
 
+    public void addGhostUI(){
+        ball.setVisible(false);
+    }
     public void resetGoldStatusUI() {
         ball.setFill(new ImagePattern(new Image("ball.png")));
         root.getStyleClass().remove("goldRoot");
@@ -185,6 +188,9 @@ public class GameView {
         paddleRect.setFill(new ImagePattern(new Image("block.jpg")));
     }
 
+    public void resetGhostUI(){
+        ball.setVisible(true);
+    }
     public void updatePaddleUI(GameModel gameModel){
         Paddle paddle = gameModel.getPaddle();
         paddleRect.setX(paddle.getX());
