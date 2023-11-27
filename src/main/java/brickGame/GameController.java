@@ -43,18 +43,25 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
             gameModel = new GameModel();
         }
 
+        if(gameModel.getLevel()==0 && !loadFromSave){
+            gameView.initializeMainMenu();
+            gameView.setSceneToStage(primaryStage);
+            initializeGameButtons();
+        }
+
         gameView.initializeUI(gameModel, loadFromSave);
         initializeGameElements();
         gameView.addToRoot(gameModel, loadFromSave);
-        if(gameModel.getLevel()<18){
-            gameView.setSceneToStage(primaryStage);
-        }
-        primaryStage.getScene().setOnKeyPressed(this);
+
         if (!loadFromSave) {
-            initializeGameButtons();
+            if(gameModel.getLevel() >1 && gameModel.getLevel()<18){
+                gameView.changeSceneToGame(primaryStage);
+            }
+            primaryStage.getScene().setOnKeyPressed(this);
             initializePauseButton();
             setupButtonActions();
         } else {
+            gameView.changeSceneToGame(primaryStage);
             initializePauseButton();
             startGameEngine();
             gameView.getPauseButton().setVisible(true);
@@ -68,13 +75,11 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
             gameView.updateLabels(gameModel);
             if (gameModel.getLevel() == 18) {
                 gameView.showWin();
-                gameView.setLevelButtonsVisibility(false);
                 return;
             }
             if (gameModel.getLevel() > 1 && gameModel.getLevel() <18) {
                 gameView.showMessage("Level Up :)");
             }
-            gameView.setLevelButtonsVisibility(gameModel.getLevel() == 1);
 
             gameView.initBallAndPaddle(gameModel);
             gameModel.initBoard();
@@ -106,7 +111,6 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
     private void initializeGameButtons() {
         gameView.getLoadButton().setOnAction(event -> {
             loadGame();
-            gameView.setLevelButtonsVisibility(false);
         });
 
         gameView.getNewGameButton().setOnAction(event -> {
@@ -115,7 +119,8 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
             engine.setFps(120);
             engine.start();
             gameView.getPauseButton().setVisible(true);
-            gameView.setLevelButtonsVisibility(false);
+            gameView.changeSceneToGame(primaryStage);
+            primaryStage.getScene().setOnKeyPressed(this);
         });
     }
 
@@ -134,7 +139,6 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
     }
     private void setupButtonActions() {
         if (gameModel.getLevel() > 1 && gameModel.getLevel() < 18) {
-            gameView.setLevelButtonsVisibility(false);
             startGameEngine();
         }
     }
@@ -387,7 +391,6 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
             Bonus mystery = iterator.next();
             if (mystery.isTaken()) {
                 mystery.getBonus().setVisible(false);
-                System.out.println("You Got the mystery gift");
                 iterator.remove();
             }
         }

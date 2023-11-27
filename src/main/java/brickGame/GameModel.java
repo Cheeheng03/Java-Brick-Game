@@ -15,6 +15,7 @@ public class GameModel {
     private long time = 0;
     private long goldTime;
     private long freezeTime;
+    private long lastHitTime = 0;
     private int paddleTimeRemaining;
     private boolean isGoldStatus = false;
     private int destroyedBlockCount;
@@ -274,14 +275,12 @@ public class GameModel {
         }
     }
 
-    private long lastHitTime = 0;
-
     public void updateBlockCollisions() {
-        if (time - lastHitTime > 5) {
+//        if (time - lastHitTime > 5) {
             for (final Block block : blocks) {
                 int hitCode = block.checkHitToBlock(gameball.getX(), gameball.getY(), xBallPrevious, yBallPrevious, gameball.getRadius());
                 if (hitCode != Block.NO_HIT) {
-                    lastHitTime = time;
+//                    lastHitTime = time;
                     addToScore(1);
                     block.isDestroyed = true;
                     blocksToRemove.add(block);
@@ -291,7 +290,7 @@ public class GameModel {
                     setPhysicsToBall();
                 }
             }
-        }
+//        }
     }
 
     private boolean isFreezeStatus = false;
@@ -408,10 +407,10 @@ public class GameModel {
 
             if (increaseWidth) {
                 paddle.increaseWidth();
-                System.out.println("Congrats! The paddle width has expanded for 10 seconds");
+                System.out.println("Congrats! The paddle width has been expanded for 10 seconds");
             } else {
                 paddle.decreaseWidth();
-                System.out.println("Oh No! The paddle width has shrunken for 10 seconds");
+                System.out.println("Oh No! The paddle width has been shrunken for 10 seconds");
             }
 
             paddleWidthChanged = true;
@@ -424,13 +423,13 @@ public class GameModel {
         new Timer().scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                if (paddleTimeRemaining > 0) {
-                    paddleTimeRemaining--;
-                } else {
-                    paddle.resetWidth();
-                    paddleWidthChanged = true;
-                    this.cancel();
-                }
+            if (paddleTimeRemaining > 0) {
+                paddleTimeRemaining--;
+            } else {
+                paddle.resetWidth();
+                paddleWidthChanged = true;
+                this.cancel();
+            }
             }
         }, 0, 1000);
     }
@@ -508,6 +507,7 @@ public class GameModel {
         goldTime = 0;
         freezeTime = 0;
         paddleTimeRemaining = 0;
+        lastHitTime = 0;
         resetGameElements();
         resetBallForNewLevel();
     }
