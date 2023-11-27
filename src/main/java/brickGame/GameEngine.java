@@ -53,6 +53,34 @@ public class GameEngine {
         }
     }
 
+    public void pause() {
+        if (!isStopped) {
+            if (updateTimeline != null) {
+                updateTimeline.pause();
+            }
+            if (physicsTimeline != null) {
+                physicsTimeline.pause();
+            }
+            if (timeTimeline != null) {
+                timeTimeline.pause();
+            }
+        }
+    }
+
+    public void resume() {
+        if (!isStopped) {
+            if (updateTimeline != null) {
+                updateTimeline.play();
+            }
+            if (physicsTimeline != null) {
+                physicsTimeline.play();
+            }
+            if (timeTimeline != null) {
+                timeTimeline.play();
+            }
+        }
+    }
+
     private void startUpdateTimeline() {
         updateTimeline = new Timeline(new KeyFrame(frameTimeDuration, e -> onAction.onUpdate()));
         updateTimeline.setCycleCount(Timeline.INDEFINITE);
