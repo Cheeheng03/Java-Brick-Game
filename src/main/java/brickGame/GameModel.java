@@ -426,7 +426,6 @@ public class GameModel {
             public void run() {
                 if (paddleTimeRemaining > 0) {
                     paddleTimeRemaining--;
-                    System.out.println("Paddle Time Remaining" + paddleTimeRemaining);
                 } else {
                     paddle.resetWidth();
                     paddleWidthChanged = true;

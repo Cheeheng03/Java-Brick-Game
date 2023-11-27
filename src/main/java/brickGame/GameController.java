@@ -23,6 +23,7 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
     private long time = 0;
     private boolean previousGoldStatus = false;
     private boolean previousFreezeStatus = false;
+    private boolean isPaused = false;
     Stage  primaryStage;
     private static final Logger logger = Logger.getLogger(GameController.class.getName());
 
@@ -51,9 +52,12 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
         primaryStage.getScene().setOnKeyPressed(this);
         if (!loadFromSave) {
             initializeGameButtons();
+            initializePauseButton();
             setupButtonActions();
         } else {
+            initializePauseButton();
             startGameEngine();
+            gameView.getPauseButton().setVisible(true);
             loadFromSave = false;
         }
     }
@@ -110,11 +114,23 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
             engine.setOnAction(this);
             engine.setFps(120);
             engine.start();
-
+            gameView.getPauseButton().setVisible(true);
             gameView.setLevelButtonsVisibility(false);
         });
     }
 
+    private void initializePauseButton(){
+        gameView.getPauseButton().setOnAction(e -> {
+            isPaused = !isPaused;
+            if (isPaused) {
+                engine.pause();
+                gameView.resumeUI();
+            } else {
+                engine.resume();
+                gameView.pauseUI();
+            }
+        });
+    }
     private void setupButtonActions() {
         if (gameModel.getLevel() > 1 && gameModel.getLevel() < 18) {
             gameView.setLevelButtonsVisibility(false);

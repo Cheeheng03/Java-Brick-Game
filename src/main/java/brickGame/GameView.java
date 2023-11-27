@@ -23,8 +23,8 @@ public class GameView {
     private Label levelLabel;
     private Button loadButton;
     private Button newGameButton;
+    private  Button pauseButton;
     Stage stage;
-
 
     public GameView() {
         root = new Pane();
@@ -43,19 +43,31 @@ public class GameView {
 
         loadButton = new Button("Load Game");
         newGameButton = new Button("Start New Game");
+        pauseButton = new Button("\u23F8");
+
         loadButton.setTranslateX(220);
         loadButton.setTranslateY(300);
         newGameButton.setTranslateX(220);
         newGameButton.setTranslateY(340);
+        pauseButton.setTranslateX(240);
+        pauseButton.setTranslateY(0);
+
+        double buttonWidth = 30;
+        double buttonHeight = 30;
+        pauseButton.setMinSize(buttonWidth, buttonHeight);
+        pauseButton.setMaxSize(buttonWidth, buttonHeight);
+        pauseButton.setPrefSize(buttonWidth, buttonHeight);
+
+        pauseButton.setVisible(false);
 
     }
 
     public void addToRoot(GameModel gameModel, boolean loadFromSave){
         root.getChildren().clear();
         if (!loadFromSave) {
-            root.getChildren().addAll(paddleRect, ball, scoreLabel, heartLabel, levelLabel, newGameButton, loadButton);
+            root.getChildren().addAll(paddleRect, ball, scoreLabel, heartLabel, levelLabel, newGameButton, loadButton, pauseButton);
         } else {
-            root.getChildren().addAll(paddleRect, ball, scoreLabel, heartLabel, levelLabel);
+            root.getChildren().addAll(paddleRect, ball, scoreLabel, heartLabel, levelLabel, pauseButton);
         }
 
         for (Block block : gameModel.getBlocks()) {
@@ -137,6 +149,13 @@ public class GameView {
         paddleRect.setWidth(paddle.getWidth());
     }
 
+    public void resumeUI(){
+        pauseButton.setText("\u25B6");
+    }
+
+    public void pauseUI(){
+        pauseButton.setText("\u23F8");
+    }
     public void showWin() {
         new Score().showWin(root);
     }
@@ -167,6 +186,9 @@ public class GameView {
 
     public Button getNewGameButton() {
         return newGameButton;
+    }
+    public Button getPauseButton() {
+        return pauseButton;
     }
 
     public Pane getRoot(){
