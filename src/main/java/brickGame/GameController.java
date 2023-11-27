@@ -120,6 +120,7 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
     }
 
     private void initializePauseButton(){
+        gameView.getPauseButton().setFocusTraversable(false);
         gameView.getPauseButton().setOnAction(e -> {
             isPaused = !isPaused;
             if (isPaused) {
