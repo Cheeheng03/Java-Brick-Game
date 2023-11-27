@@ -23,6 +23,7 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
     private long time = 0;
     private boolean previousGoldStatus = false;
     private boolean previousFreezeStatus = false;
+    private boolean previousGhostStatus = false;
     private boolean isPaused = false;
     Stage  primaryStage;
     private static final Logger logger = Logger.getLogger(GameController.class.getName());
@@ -54,7 +55,7 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
         gameView.addToRoot(gameModel, loadFromSave);
 
         if (!loadFromSave) {
-            if(gameModel.getLevel() >1 && gameModel.getLevel()<18){
+            if(gameModel.getLevel() >1 && gameModel.getLevel()<19){
                 gameView.changeSceneToGame(primaryStage);
             }
             primaryStage.getScene().setOnKeyPressed(this);
@@ -73,22 +74,22 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
         if (!loadFromSave) {
             gameModel.addToLevel(1);
             gameView.updateLabels(gameModel);
-            if (gameModel.getLevel() == 18) {
+            if (gameModel.getLevel() == 19) {
                 gameView.showWin();
                 return;
             }
-            if (gameModel.getLevel() > 1 && gameModel.getLevel() <18) {
+            if (gameModel.getLevel() > 1 && gameModel.getLevel() <19) {
                 gameView.showMessage("Level Up :)");
             }
 
             gameView.initBallAndPaddle(gameModel);
             gameModel.initBoard();
-            gameModel. setInitialBlockCount(gameModel.getBlocks().size());
         } else{
             gameView.initBallAndPaddle(gameModel);
             gameView.updateLabels(gameModel);
             updateGoldStatusUIOnLoad();
             updateFreezeStatusUIOnLoad();
+            updateGhostStatusUIOnLoad();
         }
     }
 
@@ -105,6 +106,14 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
             gameView.addFreezeRoot();
         } else {
             gameView.resetFreezeUI();
+        }
+    }
+
+    private void updateGhostStatusUIOnLoad() {
+        if (gameModel.getIsGhostStatus()) {
+            gameView.addGhostUI();
+        } else {
+            gameView.resetGhostUI();
         }
     }
 
@@ -138,7 +147,7 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
         });
     }
     private void setupButtonActions() {
-        if (gameModel.getLevel() > 1 && gameModel.getLevel() < 18) {
+        if (gameModel.getLevel() > 1 && gameModel.getLevel() < 19) {
             startGameEngine();
         }
     }
@@ -207,13 +216,14 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
         gameView.show((double) sceneWidth / 2, (double) sceneHeight / 2, -1);
 
         if (gameModel.getHeart() == 0) {
+            gameView.getPauseButton().setVisible(false);
             gameView.showGameOver(restartAction);
             engine.stop();
         }
     }
 
     private void saveGame() {
-        if (gameModel.getLevel() < 18 && gameModel.getHeart() > 0) {
+        if (gameModel.getLevel() < 19 && gameModel.getHeart() > 0) {
             LoadSave loadSave = new LoadSave();
             loadSave.saveGameState(gameModel);
             gameView.showMessage("Game Saved");
@@ -242,7 +252,7 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
             isLevelTransitionInProgress = true;
             Platform.runLater(() -> {
                 try {
-                    if(gameModel.getLevel() == 17){
+                    if(gameModel.getLevel() == 18){
                         engine.stop();
                         start(primaryStage);
                     } else{
@@ -334,6 +344,10 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
                     final Bonus mystery = new Bonus(block.row, block.column, Block.BLOCK_MYSTERY);
                     gameModel.addMystery(mystery);
                     Platform.runLater(() -> gameView.addBonusUI(mystery));
+                } else if (block.type == Block.Block_GHOST) {
+                    Platform.runLater(() -> {
+                        gameView.addGhostUI();
+                    });
                 }
             }
         }
@@ -361,6 +375,12 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
             gameView.resetFreezeUI();
         }
         previousFreezeStatus = currentFreezeStatus;
+
+        boolean currentGhostStatus = gameModel.getIsGhostStatus();
+        if (!currentGhostStatus && previousGhostStatus) {
+            gameView.resetGhostUI();
+        }
+        previousGhostStatus = currentGhostStatus;
 
         if (gameModel.isPaddleWidthChanged()) {
             gameView.updatePaddleUI(gameModel);

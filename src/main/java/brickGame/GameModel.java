@@ -15,9 +15,11 @@ public class GameModel {
     private long time = 0;
     private long goldTime;
     private long freezeTime;
+    private long ghostTime;
     private long lastHitTime = 0;
     private int paddleTimeRemaining;
     private boolean isGoldStatus = false;
+    private boolean isGhostStatus = false;
     private int destroyedBlockCount;
     private int initialBlockCount;
     private final int sceneWidth = 500;
@@ -68,16 +70,44 @@ public class GameModel {
     public void initBoard() {
         Random random = new Random();
 
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < level + 1; j++) {
-                int randomNumber = random.nextInt(500);
+        if(level == 18){
+            initCustomLevel();
+            initialBlockCount = blocks.size()-2;
+        } else {
+            for (int i = 0; i < 4; i++) {
+                for (int j = 0; j < level + 1; j++) {
+                    int randomNumber = random.nextInt(500);
 
-                if (randomNumber % 6 == 0) {
-                    continue;
+                    if (randomNumber % 6 == 0) {
+                        continue;
+                    }
+
+                    int type = determineBlockType(randomNumber);
+                    blocks.add(new Block(j, i, type));
                 }
+            }
+            initialBlockCount = blocks.size();
+        }
 
-                int type = determineBlockType(randomNumber);
-                blocks.add(new Block(j, i, type));
+
+    }
+
+    public void initCustomLevel() {
+        System.out.println("Custom");
+        blocks.clear();
+
+        Integer[][] layout = {
+                {Block.BLOCK_NORMAL, Block.BLOCK_FREEZE, Block.Block_GHOST, Block.Block_GHOST, Block.BLOCK_FREEZE, null, Block.BLOCK_FREEZE, Block.BLOCK_MYSTERY, Block.BLOCK_STAR, Block.BLOCK_WALL, Block.Block_GHOST, Block.BLOCK_MYSTERY, Block.Block_GHOST },
+                {Block.BLOCK_WALL, Block.Block_GHOST, Block.BLOCK_CHOCO, Block.BLOCK_CHOCO, Block.Block_GHOST, Block.BLOCK_STAR, Block.BLOCK_FREEZE, Block.BLOCK_STAR, Block.BLOCK_FREEZE, null, Block.BLOCK_HEART},
+                {Block.BLOCK_WALL, Block.Block_GHOST, Block.BLOCK_CHOCO, Block.BLOCK_CHOCO, Block.Block_GHOST, Block.BLOCK_STAR, Block.BLOCK_FREEZE, Block.BLOCK_STAR, null, Block.BLOCK_FREEZE, Block.BLOCK_HEART},
+                {Block.BLOCK_NORMAL, Block.BLOCK_FREEZE, Block.Block_GHOST, Block.Block_GHOST, Block.BLOCK_FREEZE, null, Block.BLOCK_FREEZE, Block.BLOCK_MYSTERY, Block.BLOCK_STAR, Block.Block_GHOST, Block.BLOCK_WALL, Block.BLOCK_MYSTERY, Block.Block_GHOST }
+        };
+
+        for (int i = 0; i < layout.length; i++) {
+            for (int j = 0; j < layout[i].length; j++) {
+                if (layout[i][j] != null) {
+                    blocks.add(new Block(j, i, layout[i][j]));
+                }
             }
         }
     }
@@ -281,10 +311,12 @@ public class GameModel {
                 int hitCode = block.checkHitToBlock(gameball.getX(), gameball.getY(), xBallPrevious, yBallPrevious, gameball.getRadius());
                 if (hitCode != Block.NO_HIT) {
 //                    lastHitTime = time;
-                    addToScore(1);
-                    block.isDestroyed = true;
-                    blocksToRemove.add(block);
 
+                    if (!(block.type == Block.BLOCK_WALL)) {
+                        addToScore(1);
+                        block.isDestroyed = true;
+                        blocksToRemove.add(block);
+                    }
                     handleSpecialBlock(block);
                     setCollisionFlags(hitCode);
                     setPhysicsToBall();
@@ -310,33 +342,28 @@ public class GameModel {
         } else if (block.type == Block.BLOCK_MYSTERY) {
             final Bonus mystery = new Bonus(block.row, block.column, Block.BLOCK_MYSTERY);
             mystery.timeCreated = time;
+        } else if (block.type == Block.Block_GHOST) {
+            ghostTime = time;
+            isGhostStatus = true;
         }
     }
 
     private void setCollisionFlags(int hitCode) {
         if (hitCode == Block.HIT_RIGHT) {
-            System.out.println("Hit right");
             colideToRightBlock = true;
         } else if (hitCode == Block.HIT_BOTTOM) {
-            System.out.println("Hit bottom");
             colideToBottomBlock = true;
         } else if (hitCode == Block.HIT_LEFT) {
-            System.out.println("Hit Left");
             colideToLeftBlock = true;
         } else if (hitCode == Block.HIT_TOP) {
-            System.out.println("Hit top");
             colideToTopBlock = true;
         } else if (hitCode == Block.HIT_TOP_LEFT) {
-            System.out.println("Hit top left");
             colideToTopLeftBlock = true;
         } else if (hitCode == Block.HIT_TOP_RIGHT) {
-            System.out.println("Hit top right");
             colideToTopRightBlock = true;
         } else if (hitCode == Block.HIT_BOTTOM_LEFT) {
-            System.out.println("Hit bottom left");
             colideToBottomLeftBlock = true;
         } else if (hitCode == Block.HIT_BOTTOM_RIGHT) {
-            System.out.println("Hit bottom right");
             colideToBottomRightBlock = true;
         }
     }
@@ -354,20 +381,16 @@ public class GameModel {
 
     public void updateSpecialBlockStatus(long currentTime) {
         if (currentTime - goldTime > 5000) {
-            resetGoldStatus();
+            isGoldStatus = false;
         }
         if(currentTime - freezeTime > 3000){
-            resetFreezeStatus();
+            isFreezeStatus = false;
+        }
+        if(currentTime - ghostTime > 1500){
+            isGhostStatus = false;
         }
     }
 
-    private void resetGoldStatus() {
-        isGoldStatus = false;
-    }
-
-    private void resetFreezeStatus() {
-        isFreezeStatus = false;
-    }
 
     public void updateBonusBlocks(){
         handleBonusUpdates(chocos);
@@ -502,10 +525,13 @@ public class GameModel {
         resetColideFlags();
         goDownBall = true;
         isGoldStatus = false;
+        isFreezeStatus = false;
+        isGhostStatus = false;
         isExistHeartBlock = false;
         time = 0;
         goldTime = 0;
         freezeTime = 0;
+        ghostTime = 0;
         paddleTimeRemaining = 0;
         lastHitTime = 0;
         resetGameElements();
@@ -521,13 +547,19 @@ public class GameModel {
         this.setTime(loadSave.time);
         this.setGoldTime(loadSave.goldTime);
         this.setFreezeTime(loadSave.freezeTime);
+        this.setGhostTime(loadSave.ghostTime);
 
         this.setGoldStatus(loadSave.isGoldStauts);
         this.setIsFreezeStatus(loadSave.isFreezeStatus);
+        this.setGhostStatus(loadSave.isGhostStatus);
         this.setPaddleWidthChanged(loadSave.isPaddleChanged);
         this.setPaddleTimeRemaining(loadSave.paddleTimeRemaining);
         this.setIsExistHeartBlock(loadSave.isExistHeartBlock);
-        this.setInitialBlockCount(loadSave.blocks.size() + loadSave.destroyedBlockCount);
+        if(loadSave.level == 17){
+            this.setInitialBlockCount(loadSave.blocks.size() + loadSave.destroyedBlockCount - 4);
+        } else{
+            this.setInitialBlockCount(loadSave.blocks.size() + loadSave.destroyedBlockCount);
+        }
 
         // Setting ball state
         Ball gameball = this.getGameball();
@@ -611,12 +643,20 @@ public class GameModel {
         return freezeTime;
     }
 
+    public long getGhostTime(){
+        return ghostTime;
+    }
+
     public boolean getIsGoldStatus() {
         return isGoldStatus;
     }
 
     public boolean getIsFreezeStatus(){
         return isFreezeStatus;
+    }
+
+    public boolean getIsGhostStatus(){
+        return isGhostStatus;
     }
 
     public int getDestroyedBlockCount() {
@@ -732,12 +772,20 @@ public class GameModel {
         this.goldTime = goldTime;
     }
 
+    public  void setGhostTime(long ghostTime){
+        this.ghostTime= ghostTime;
+    }
+
     public  void setFreezeTime(long freezeTime){
         this.freezeTime = freezeTime;
     }
 
     public void setGoldStatus(boolean isGoldStatus) {
         this.isGoldStatus = isGoldStatus;
+    }
+
+    public void setGhostStatus(boolean isGhostStatus) {
+        this.isGhostStatus = isGhostStatus;
     }
 
     public void setDestroyedBlockCount(int count) {
