@@ -5,43 +5,33 @@ import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Text;
 
 import java.io.Serializable;
 import java.util.Random;
 
 public class Block implements Serializable {
-    private static Block block = new Block(-1, -1, 99);
-
+    private static Block block = new Block(-1, -1, 99, 0);
     public int row;
     public int column;
-
-
     public boolean isDestroyed = false;
-
-    private Color color;
     public int type;
-
     public int x;
     public int y;
-
     private int width = 100;
     private int height = 30;
     private int paddingTop = height * 2;
     private int paddingH = 50;
     public Rectangle rect;
-
-
     public static int NO_HIT = -1;
     public static int HIT_RIGHT = 0;
     public static int HIT_BOTTOM = 1;
     public static int HIT_LEFT = 2;
     public static int HIT_TOP = 3;
-
     public static int HIT_TOP_LEFT = 4;
     public static int HIT_TOP_RIGHT = 5;
     public static int HIT_BOTTOM_LEFT = 6;
     public static int HIT_BOTTOM_RIGHT = 7;
-
     public static int BLOCK_NORMAL = 99;
     public static int BLOCK_CHOCO = 100;
     public static int BLOCK_STAR = 101;
@@ -50,11 +40,23 @@ public class Block implements Serializable {
     public static int BLOCK_MYSTERY = 104;
     public static int BLOCK_WALL = 105;
     public static int Block_GHOST= 106;
+    public static int BLOCK_COUNT_BREAKER =107;
+    private int hitsToDestroy;
+    private int currentHits;
+    private long lastHitTime = -1;
+    private static final long COOLDOWN_TIME = 30;
+    public boolean isAlreadyHit = false;
+    private boolean blockHitFlagReset = false;
+    public Text blockText;
 
-    public Block(int row, int column, int type) {
+    public Block(int row, int column, int type, int hitsToDestroy) {
         this.row = row;
         this.column = column;
         this.type = type;
+
+        if (this.type == BLOCK_COUNT_BREAKER) {
+            this.hitsToDestroy = hitsToDestroy;
+        }
 
         draw();
     }
@@ -97,7 +99,15 @@ public class Block implements Serializable {
             Image image = new Image("ghost.jpg");
             ImagePattern pattern = new ImagePattern(image);
             rect.setFill(pattern);
-        } else {
+        } else if (type == BLOCK_COUNT_BREAKER) {
+            blockText = new Text(""+hitsToDestroy);
+            blockText.setX(x + rect.getWidth() / 2 - blockText.getLayoutBounds().getWidth() / 2);
+            blockText.setY(y + rect.getHeight() / 2 + blockText.getLayoutBounds().getHeight() / 4);
+            blockText.setFill(Color.WHITE);
+            Image image = new Image("countBreaker.jpeg");
+            ImagePattern pattern = new ImagePattern(image);
+            rect.setFill(pattern);
+        }else {
             int imageIndex = new Random().nextInt(3);
             String imageName = "brick" + (imageIndex + 1) + ".jpg";
             Image image = new Image(imageName);
@@ -107,11 +117,20 @@ public class Block implements Serializable {
 
     }
 
+    public void resetHitFlagOnce() {
+        if (isAlreadyHit) {
+            isAlreadyHit = false;
+            blockHitFlagReset = true;
+        } else {
+            blockHitFlagReset = false;
+        }
+    }
+
 
     public int checkHitToBlock(double xBall, double yBall, double xBallPrevious, double yBallPrevious, double ballRadius) {
         final double Epsilon = 0.00001; // Define an epsilon value for floating-point comparison
 
-        if (isDestroyed) {
+        if (isDestroyed || isAlreadyHit) {
             return NO_HIT;
         }
 
@@ -172,6 +191,29 @@ public class Block implements Serializable {
         }
 
         return NO_HIT; // If none of the conditions met, there is no hit
+    }
+
+    public void decrementCount() {
+        if (type == BLOCK_COUNT_BREAKER && hitsToDestroy > 0) {
+            hitsToDestroy--;
+            blockText.setText("" + hitsToDestroy);
+        }
+    }
+
+    public boolean checkAndProcessHit(long currentTime) {
+        if (this.lastHitTime >= currentTime - COOLDOWN_TIME) {
+            return false;
+        }
+        this.lastHitTime = currentTime;
+        return true;
+    }
+
+    public int getHitsToDestroy() {
+        return hitsToDestroy;
+    }
+
+    public void setHitsToDestroy(int count) {
+        this.hitsToDestroy = count;
     }
 
     public static int getPaddingTop() {

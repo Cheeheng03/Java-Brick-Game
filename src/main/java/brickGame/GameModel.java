@@ -70,9 +70,14 @@ public class GameModel {
     public void initBoard() {
         Random random = new Random();
 
-        if(level == 18){
-            initCustomLevel();
+        if(level == 17){
+            CustomLevel customLevel = new CustomLevel17(this);
+            customLevel.initLevel();
             initialBlockCount = blocks.size()-2;
+        } else if(level == 18){
+            CustomLevel customLevel = new CustomLevel18(this);
+            customLevel.initLevel();
+            initialBlockCount = blocks.size()-4;
         } else {
             for (int i = 0; i < 4; i++) {
                 for (int j = 0; j < level + 1; j++) {
@@ -83,32 +88,10 @@ public class GameModel {
                     }
 
                     int type = determineBlockType(randomNumber);
-                    blocks.add(new Block(j, i, type));
+                    blocks.add(new Block(j, i, type, 0));
                 }
             }
             initialBlockCount = blocks.size();
-        }
-
-
-    }
-
-    public void initCustomLevel() {
-        System.out.println("Custom");
-        blocks.clear();
-
-        Integer[][] layout = {
-                {Block.BLOCK_NORMAL, Block.BLOCK_FREEZE, Block.Block_GHOST, Block.Block_GHOST, Block.BLOCK_FREEZE, null, Block.BLOCK_FREEZE, Block.BLOCK_MYSTERY, Block.BLOCK_STAR, Block.BLOCK_WALL, Block.Block_GHOST, Block.BLOCK_MYSTERY, Block.Block_GHOST },
-                {Block.BLOCK_WALL, Block.Block_GHOST, Block.BLOCK_CHOCO, Block.BLOCK_CHOCO, Block.Block_GHOST, Block.BLOCK_STAR, Block.BLOCK_FREEZE, Block.BLOCK_STAR, Block.BLOCK_FREEZE, null, Block.BLOCK_HEART},
-                {Block.BLOCK_WALL, Block.Block_GHOST, Block.BLOCK_CHOCO, Block.BLOCK_CHOCO, Block.Block_GHOST, Block.BLOCK_STAR, Block.BLOCK_FREEZE, Block.BLOCK_STAR, null, Block.BLOCK_FREEZE, Block.BLOCK_HEART},
-                {Block.BLOCK_NORMAL, Block.BLOCK_FREEZE, Block.Block_GHOST, Block.Block_GHOST, Block.BLOCK_FREEZE, null, Block.BLOCK_FREEZE, Block.BLOCK_MYSTERY, Block.BLOCK_STAR, Block.Block_GHOST, Block.BLOCK_WALL, Block.BLOCK_MYSTERY, Block.Block_GHOST }
-        };
-
-        for (int i = 0; i < layout.length; i++) {
-            for (int j = 0; j < layout[i].length; j++) {
-                if (layout[i][j] != null) {
-                    blocks.add(new Block(j, i, layout[i][j]));
-                }
-            }
         }
     }
 
@@ -306,23 +289,36 @@ public class GameModel {
     }
 
     public void updateBlockCollisions() {
-//        if (time - lastHitTime > 5) {
             for (final Block block : blocks) {
+                // Check for collision with the ball
                 int hitCode = block.checkHitToBlock(gameball.getX(), gameball.getY(), xBallPrevious, yBallPrevious, gameball.getRadius());
-                if (hitCode != Block.NO_HIT) {
-//                    lastHitTime = time;
+                if (hitCode != Block.NO_HIT && block.checkAndProcessHit(time)) {
+                    block.isAlreadyHit = true; // Mark the block as hit
 
-                    if (!(block.type == Block.BLOCK_WALL)) {
+                    if (block.type == Block.BLOCK_COUNT_BREAKER) {
+                        block.decrementCount(); // Decrement the count
+                        if (block.getHitsToDestroy() == 0) {
+                            addToScore(1);
+                            block.isDestroyed = true;
+                            blocksToRemove.add(block);
+                        }
+                    } else if (block.type != Block.BLOCK_WALL) {
                         addToScore(1);
                         block.isDestroyed = true;
                         blocksToRemove.add(block);
                     }
+
                     handleSpecialBlock(block);
                     setCollisionFlags(hitCode);
                     setPhysicsToBall();
                 }
             }
-//        }
+
+        for (final Block block : blocks) {
+            if (block.type == Block.BLOCK_WALL || block.type == Block.BLOCK_COUNT_BREAKER) {
+                block.resetHitFlagOnce();
+            }
+        }
     }
 
     private boolean isFreezeStatus = false;
@@ -604,7 +600,7 @@ public class GameModel {
     private void restoreBlocksFromSerializable(ArrayList<BlockSerializable> blockSerializables) {
         this.blocks.clear();
         for (BlockSerializable ser : blockSerializables) {
-            this.blocks.add(new Block(ser.row, ser.j, ser.type));
+            this.blocks.add(new Block(ser.row, ser.j, ser.type, ser.countBreakerCount));
         }
     }
 

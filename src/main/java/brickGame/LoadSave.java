@@ -112,7 +112,14 @@ public class LoadSave {
             if (block.isDestroyed) {
                 continue;
             }
-            blockSerializables.add(new BlockSerializable(block.row, block.column, block.type));
+
+            int countBreakerCount = 0;
+            if (block.type == Block.BLOCK_COUNT_BREAKER) {
+                countBreakerCount = block.getHitsToDestroy();
+            }
+
+            blockSerializables.add(new BlockSerializable(block.row, block.column, block.type, countBreakerCount));
+
         }
         outputStream.writeObject(blockSerializables);
     }
