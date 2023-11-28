@@ -45,14 +45,7 @@ public class GameView {
         levelLabel.setTranslateY(20);
         heartLabel.setTranslateX(sceneWidth - 75);
 
-        //loadButton = new Button("Load Game");
-        //newGameButton = new Button("Start New Game");
         pauseButton = new Button("\u23F8");
-
-//        loadButton.setTranslateX(220);
-//        loadButton.setTranslateY(300);
-//        newGameButton.setTranslateX(220);
-//        newGameButton.setTranslateY(340);
         pauseButton.setTranslateX(240);
         pauseButton.setTranslateY(0);
 
@@ -104,6 +97,9 @@ public class GameView {
 
         for (Block block : gameModel.getBlocks()) {
             root.getChildren().add(block.rect);
+            if (block.type == Block.BLOCK_COUNT_BREAKER && block.blockText != null) {
+                root.getChildren().add(block.blockText);
+            }
         }
     }
 
@@ -155,6 +151,9 @@ public class GameView {
 
     public void setNotVisibleAfterBlockRemoval(Block block) {
         block.rect.setVisible(false);
+        if (block.type == Block.BLOCK_COUNT_BREAKER && block.blockText != null) {
+            block.blockText.setVisible(false);
+        }
     }
 
     public void addBonusUI(Bonus bonus){
