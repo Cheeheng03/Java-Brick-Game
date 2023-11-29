@@ -4,12 +4,15 @@ import brickGame.Model.Block;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 
 import java.util.Random;
 
 public class BlockView {
     private Block block;
+    private Rectangle rect;
+    private Text blockText;
     private int width = 100;
     private int height = 30;
     private int paddingTop = height * 2;
@@ -17,17 +20,19 @@ public class BlockView {
 
     public BlockView(Block block) {
         this.block = block;
-        draw(block);
+        rect = new Rectangle();
+        rect.setWidth(width);
+        rect.setHeight(height);
+
+        draw();
     }
 
-    private void draw(Block block) {
+    private void draw() {
         int x = (block.column * width) + paddingH;
         int y = (block.row * height) + paddingTop;
 
-        block.rect.setWidth(width);
-        block.rect.setHeight(height);
-        block.rect.setX(x);
-        block.rect.setY(y);
+        rect.setX(x);
+        rect.setY(y);
 
         if (block.type == Block.BLOCK_CHOCO) {
             setImagePattern("choco.jpg");
@@ -54,19 +59,29 @@ public class BlockView {
     private void setImagePattern(String imageName) {
         Image image = new Image(imageName);
         ImagePattern pattern = new ImagePattern(image);
-        block.rect.setFill(pattern);
+        rect.setFill(pattern);
     }
 
     private Text createBlockText(String text) {
-        block.blockText = new Text(text);
-        block.blockText.setX(block.rect.getX() + width / 2 - block.blockText.getLayoutBounds().getWidth() / 2);
-        block.blockText.setY(block.rect.getY() + height / 2 + block.blockText.getLayoutBounds().getHeight() / 4);
-        block.blockText.setFill(Color.WHITE);
-        return block.blockText;
+        blockText = new Text(text);
+        blockText.setX(rect.getX() + width / 2 - blockText.getLayoutBounds().getWidth() / 2);
+        blockText.setY(rect.getY() + height / 2 + blockText.getLayoutBounds().getHeight() / 4);
+        blockText.setFill(Color.WHITE);
+        return blockText;
     }
 
     private String getRandomBrickImage() {
         int imageIndex = new Random().nextInt(3);
         return "brick" + (imageIndex + 1) + ".jpg";
     }
+
+    // Getters for the Rectangle and Text, if needed elsewhere
+    public Rectangle getRect() {
+        return rect;
+    }
+
+    public Text getBlockText() {
+        return blockText;
+    }
 }
+
