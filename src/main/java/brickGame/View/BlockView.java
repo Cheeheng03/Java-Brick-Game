@@ -75,7 +75,6 @@ public class BlockView {
         return "brick" + (imageIndex + 1) + ".jpg";
     }
 
-    // Getters for the Rectangle and Text, if needed elsewhere
     public Rectangle getRect() {
         return rect;
     }

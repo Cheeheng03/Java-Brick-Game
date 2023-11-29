@@ -394,8 +394,6 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
         gameModel.updateBonusBlocks();
         updateChocoUI();
         updateMysteryUI();
-
-        gameModel.setPhysicsUpdated(false);
     }
 
     private void updateChocoUI() {
