@@ -14,8 +14,8 @@ public class CustomLevel18 implements CustomLevel {
 
         Integer[][] layout = {
                 {Block.BLOCK_NORMAL, Block.BLOCK_FREEZE, Block.Block_GHOST, Block.Block_GHOST, Block.BLOCK_FREEZE, null, Block.BLOCK_FREEZE, Block.BLOCK_MYSTERY, Block.BLOCK_STAR, Block.BLOCK_WALL, Block.Block_GHOST, Block.BLOCK_MYSTERY, Block.Block_GHOST },
-                {Block.BLOCK_WALL, Block.Block_GHOST, Block.BLOCK_CHOCO, Block.BLOCK_CHOCO, Block.Block_GHOST, Block.BLOCK_STAR, Block.BLOCK_FREEZE, Block.BLOCK_STAR, Block.BLOCK_FREEZE, null, Block.BLOCK_HEART},
-                {Block.BLOCK_WALL, Block.Block_GHOST, Block.BLOCK_CHOCO, Block.BLOCK_CHOCO, Block.Block_GHOST, Block.BLOCK_STAR, Block.BLOCK_FREEZE, Block.BLOCK_STAR, null, Block.BLOCK_FREEZE, Block.BLOCK_HEART},
+                {Block.BLOCK_FREEZE, Block.Block_GHOST, Block.BLOCK_CHOCO, Block.BLOCK_CHOCO, Block.Block_GHOST, Block.BLOCK_STAR, Block.BLOCK_FREEZE, Block.BLOCK_STAR, Block.BLOCK_FREEZE, null, Block.BLOCK_HEART},
+                {Block.BLOCK_FREEZE, Block.Block_GHOST, Block.BLOCK_CHOCO, Block.BLOCK_CHOCO, Block.Block_GHOST, Block.BLOCK_STAR, Block.BLOCK_FREEZE, Block.BLOCK_STAR, null, Block.BLOCK_FREEZE, Block.BLOCK_HEART},
                 {Block.BLOCK_NORMAL, Block.BLOCK_FREEZE, Block.Block_GHOST, Block.Block_GHOST, Block.BLOCK_FREEZE, null, Block.BLOCK_FREEZE, Block.BLOCK_MYSTERY, Block.BLOCK_STAR, Block.Block_GHOST, Block.BLOCK_WALL, Block.BLOCK_MYSTERY, Block.Block_GHOST }
         };
 

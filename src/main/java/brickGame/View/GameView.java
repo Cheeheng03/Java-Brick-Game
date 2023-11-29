@@ -104,9 +104,9 @@ public class GameView {
         }
 
         for (Block block : gameModel.getBlocks()) {
-            root.getChildren().add(block.rect);
+            root.getChildren().add(block.getBlockView().getRect());
             if (block.type == Block.BLOCK_COUNT_BREAKER && block.blockText != null) {
-                root.getChildren().add(block.blockText);
+                root.getChildren().add(block.getBlockView().getBlockText());
             }
         }
     }
@@ -154,9 +154,9 @@ public class GameView {
     }
 
     public void setNotVisibleAfterBlockRemoval(Block block) {
-        block.rect.setVisible(false);
+        block.getBlockView().getRect().setVisible(false);
         if (block.type == Block.BLOCK_COUNT_BREAKER && block.blockText != null) {
-            block.blockText.setVisible(false);
+            block.getBlockView().getBlockText().setVisible(false);
         }
     }
 

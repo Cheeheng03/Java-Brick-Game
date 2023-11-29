@@ -31,6 +31,8 @@ public class Physics {
     }
 
     private void calculateBallDirectionAfterBreakCollision() {
+        gameModel.resetColideFlags();
+        gameModel.setColideToBreak(true);
         gameball.bounceUp();
 
         double relation = (gameball.getX() - paddle.getCenterBreakX()) / ((double) paddle.getWidth() / 2);
@@ -42,6 +44,7 @@ public class Physics {
         } else {
             gameball.bounceLeft();
         }
+
     }
 
     private double calculateVelocityX(double relation, int level) {
@@ -86,6 +89,8 @@ public class Physics {
     }
 
     public void handleBlockCollisions() {
+        handleCornerCollisions();
+
         if (gameModel.isColideToTopBlock()) {
             handleTopBlockCollision();
         }
@@ -127,6 +132,78 @@ public class Physics {
     private void handleRightBlockCollision() {
         gameball.bounceRight();
     }
+
+    private void handleCornerCollisions() {
+        Ball gameBall = gameModel.getGameball();
+
+        boolean isMovingDown = gameBall.isGoingDown();
+        boolean isMovingUp = gameBall.isGoingUp();
+        boolean isMovingLeft = gameBall.isGoingLeft();
+        boolean isMovingRight = gameBall.isGoingRight();
+
+        if (gameModel.isColideToTopRightBlock() && gameModel.isColideToBottomRightBlock()) {
+            System.out.println("Top Right and Bottom Right");
+            if (isMovingDown) {
+                gameModel.setColideToTopRightBlock(false);
+            } else if (isMovingUp) {
+                gameModel.setColideToBottomRightBlock(false);
+            }
+        }
+
+        if (gameModel.isColideToTopLeftBlock() && gameModel.isColideToBottomLeftBlock()) {
+            System.out.println("Top Left and Bottom Left");
+            if (isMovingDown) {
+                gameModel.setColideToTopLeftBlock(false);
+            } else if (isMovingUp) {
+                gameModel.setColideToBottomLeftBlock(false);
+            }
+        }
+
+        if (gameModel.isColideToTopRightBlock() && gameModel.isColideToTopLeftBlock()) {
+            System.out.println("Top Left and Top Right");
+            if (isMovingRight) {
+                gameModel.setColideToTopLeftBlock(false);
+            } else if (isMovingLeft) {
+                gameModel.setColideToTopRightBlock(false);
+            }
+        }
+
+        if (gameModel.isColideToBottomRightBlock() && gameModel.isColideToBottomLeftBlock()) {
+            System.out.println("Bottom left and Bottom Right");
+            if (isMovingRight) {
+                gameModel.setColideToBottomLeftBlock(false);
+            } else if (isMovingLeft) {
+                gameModel.setColideToBottomRightBlock(false);
+            }
+        }
+
+        if (gameModel.isColideToTopRightBlock() && gameModel.isColideToBottomLeftBlock()) {
+            System.out.println("Top Right and Bottom Left Collision");
+            if (isMovingRight) {
+                gameModel.setColideToBottomLeftBlock(false);
+            } else if (isMovingLeft) {
+                gameModel.setColideToTopRightBlock(false);
+            } else if (isMovingDown) {
+                gameModel.setColideToTopRightBlock(false);
+            } else if (isMovingUp) {
+                gameModel.setColideToBottomLeftBlock(false);
+            }
+        }
+
+        if (gameModel.isColideToTopLeftBlock() && gameModel.isColideToBottomRightBlock()) {
+            System.out.println("Top Left and Bottom Right Collision");
+            if (isMovingRight) {
+                gameModel.setColideToTopLeftBlock(false);
+            } else if (isMovingLeft) {
+                gameModel.setColideToBottomRightBlock(false);
+            } else if (isMovingDown) {
+                gameModel.setColideToTopLeftBlock(false);
+            } else if (isMovingUp) {
+                gameModel.setColideToBottomRightBlock(false);
+            }
+        }
+    }
+
 
     private void handleTopLeftBlockCollision() {
         if (gameball.isGoingUp()) {

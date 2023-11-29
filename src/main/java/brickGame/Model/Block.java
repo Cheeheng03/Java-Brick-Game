@@ -1,6 +1,6 @@
 package brickGame.Model;
 
-
+import brickGame.View.BlockView;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
@@ -48,6 +48,7 @@ public class Block implements Serializable {
     public boolean isAlreadyHit = false;
     private boolean blockHitFlagReset = false;
     public Text blockText;
+    private BlockView blockView;
 
     public Block(int row, int column, int type, int hitsToDestroy) {
         this.row = row;
@@ -58,63 +59,13 @@ public class Block implements Serializable {
             this.hitsToDestroy = hitsToDestroy;
         }
 
-        draw();
+        this.blockView = new BlockView(this);
+        this.setPosition();
     }
 
-    private void draw() {
+    private void setPosition() {
         x = (column * width) + paddingH;
         y = (row * height) + paddingTop;
-
-        rect = new Rectangle();
-        rect.setWidth(width);
-        rect.setHeight(height);
-        rect.setX(x);
-        rect.setY(y);
-
-        if (type == BLOCK_CHOCO) {
-            Image image = new Image("choco.jpg");
-            ImagePattern pattern = new ImagePattern(image);
-            rect.setFill(pattern);
-        } else if (type == BLOCK_HEART) {
-            Image image = new Image("heart.jpg");
-            ImagePattern pattern = new ImagePattern(image);
-            rect.setFill(pattern);
-        } else if (type == BLOCK_STAR) {
-            Image image = new Image("star.jpg");
-            ImagePattern pattern = new ImagePattern(image);
-            rect.setFill(pattern);
-        } else if (type == BLOCK_FREEZE) {
-            Image image = new Image("freeze.jpg");
-            ImagePattern pattern = new ImagePattern(image);
-            rect.setFill(pattern);
-        } else if (type == BLOCK_MYSTERY) {
-            Image image = new Image("mystery.jpg");
-            ImagePattern pattern = new ImagePattern(image);
-            rect.setFill(pattern);
-        } else if (type == BLOCK_WALL) {
-            Image image = new Image("bedrock.jpg");
-            ImagePattern pattern = new ImagePattern(image);
-            rect.setFill(pattern);
-        } else if (type == Block_GHOST) {
-            Image image = new Image("ghost.jpg");
-            ImagePattern pattern = new ImagePattern(image);
-            rect.setFill(pattern);
-        } else if (type == BLOCK_COUNT_BREAKER) {
-            blockText = new Text(""+hitsToDestroy);
-            blockText.setX(x + rect.getWidth() / 2 - blockText.getLayoutBounds().getWidth() / 2);
-            blockText.setY(y + rect.getHeight() / 2 + blockText.getLayoutBounds().getHeight() / 4);
-            blockText.setFill(Color.WHITE);
-            Image image = new Image("countBreaker.jpeg");
-            ImagePattern pattern = new ImagePattern(image);
-            rect.setFill(pattern);
-        }else {
-            int imageIndex = new Random().nextInt(3);
-            String imageName = "brick" + (imageIndex + 1) + ".jpg";
-            Image image = new Image(imageName);
-            ImagePattern pattern = new ImagePattern(image);
-            rect.setFill(pattern);
-        }
-
     }
 
     public void resetHitFlagOnce() {
@@ -231,6 +182,9 @@ public class Block implements Serializable {
 
     public static int getWidth() {
         return block.width;
+    }
+    public BlockView getBlockView() {
+        return blockView;
     }
 
 }

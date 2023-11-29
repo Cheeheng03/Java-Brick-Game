@@ -12,7 +12,7 @@ public class GameModel {
     private Queue<Block> blocksToRemove;
     private int level = 0;
     private int score = 0;
-    private int heart = 100;
+    private int heart = 10000;
     private long time = 0;
     private long goldTime;
     private long freezeTime;
