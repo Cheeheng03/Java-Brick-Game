@@ -12,7 +12,7 @@ public class GameModel {
     private Queue<Block> blocksToRemove;
     private int level = 0;
     private int score = 0;
-    private int heart = 3;
+    private int heart = 100;
     private long time = 0;
     private long goldTime;
     private long freezeTime;
@@ -43,6 +43,7 @@ public class GameModel {
     private boolean colideToTopRightBlock       = false;
     private boolean colideToBottomLeftBlock     = false;
     private boolean colideToBottomRightBlock    = false;
+    private boolean physicsUpdated = false;
 
     public GameModel() {
         this.paddle = new Paddle();
@@ -57,7 +58,7 @@ public class GameModel {
         Random random = new Random();
 
         int xBall = random.nextInt(sceneWidth) + 1;
-        int blocksBottomY = (level + 1) * Block.getHeight() + Block.getPaddingTop();
+        int blocksBottomY = (level + 2) * Block.getHeight() + Block.getPaddingTop();
         int paddleTopY = (int) paddle.getY();
         int ballRadius = 10;
         int ballMinY = blocksBottomY + ballRadius;
@@ -139,6 +140,7 @@ public class GameModel {
     public void setPhysicsToBall() {
         this.physics = new Physics(this);
         physics.setPhysicsToBall();
+        physicsUpdated = true;
     }
 
     public boolean checkPaddleCollisions(){
@@ -171,7 +173,9 @@ public class GameModel {
 
                     handleSpecialBlock(block);
                     setCollisionFlags(hitCode);
-                    setPhysicsToBall();
+                    if (!physicsUpdated) {
+                        setPhysicsToBall();
+                    }
                 }
             }
 
@@ -660,5 +664,9 @@ public class GameModel {
 
     public int getSceneWidth(){
         return sceneWidth;
+    }
+
+    public void setPhysicsUpdated(boolean b) {
+        this.physicsUpdated=b;
     }
 }

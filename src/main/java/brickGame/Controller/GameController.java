@@ -6,6 +6,7 @@ import brickGame.Model.GameModel;
 import brickGame.Model.LoadSave;
 import brickGame.View.GameView;
 import brickGame.View.GameSound;
+import brickGame.View.Score;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.scene.input.KeyCode;
@@ -52,7 +53,7 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
             gameModel = new GameModel();
         }
 
-        if(gameModel.getLevel()==15 && !loadFromSave){
+        if(gameModel.getLevel()==0 && !loadFromSave){
             gameView.initializeMainMenu();
             gameView.setSceneToStage(primaryStage);
             initializeGameButtons();
@@ -85,7 +86,7 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
             if (gameModel.getLevel() == 19) {
                 gameSound.stopBackgroundMusic();
                 gameSound.playWinSound();
-                gameView.showWin();
+                gameView.showWin(restartAction, gameModel);
                 return;
             }
             if (gameModel.getLevel() > 1 && gameModel.getLevel() <19) {
@@ -167,9 +168,6 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
                 move(LEFT);
             } else if (event.getCode() == KeyCode.RIGHT) {
                 move(RIGHT);
-//        } else if(event.getCode() == KeyCode.DOWN) {
-//            //setPhysicsToBall(); // Assuming you have physics method for ball
-//        }
             }
         }
         if (event.getCode() == KeyCode.S) {
@@ -219,7 +217,7 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
             gameSound.stopBackgroundMusic();
             gameSound.playLoseSound();
             gameView.getPauseButton().setVisible(false);
-            gameView.showGameOver(restartAction);
+            gameView.showGameOver(restartAction, gameModel);
             engine.stop();
         }
     }
@@ -274,7 +272,7 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
         }
     }
 
-    GameView.Score.GameRestartAction restartAction = () -> {
+    Score.GameRestartAction restartAction = () -> {
         Platform.runLater(() -> {
             try {
                 gameModel.resetGameForRestart();
@@ -396,6 +394,8 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
         gameModel.updateBonusBlocks();
         updateChocoUI();
         updateMysteryUI();
+
+        gameModel.setPhysicsUpdated(false);
     }
 
     private void updateChocoUI() {
