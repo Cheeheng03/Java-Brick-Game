@@ -44,7 +44,7 @@ public class Block implements Serializable {
     private int hitsToDestroy;
     private int currentHits;
     private long lastHitTime = -1;
-    private static final long COOLDOWN_TIME = 30;
+    private static final long COOLDOWN_TIME = 25;
     public boolean isAlreadyHit = false;
     private boolean blockHitFlagReset = false;
     public Text blockText;

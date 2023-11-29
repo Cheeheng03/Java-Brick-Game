@@ -12,7 +12,7 @@ public class GameModel {
     private Queue<Block> blocksToRemove;
     private int level = 0;
     private int score = 0;
-    private int heart = 10000;
+    private int heart = 3;
     private long time = 0;
     private long goldTime;
     private long freezeTime;
@@ -43,7 +43,7 @@ public class GameModel {
     private boolean colideToTopRightBlock       = false;
     private boolean colideToBottomLeftBlock     = false;
     private boolean colideToBottomRightBlock    = false;
-    private boolean physicsUpdated = false;
+    private boolean isFreezeStatus = false;
 
     public GameModel() {
         this.paddle = new Paddle();
@@ -140,7 +140,6 @@ public class GameModel {
     public void setPhysicsToBall() {
         this.physics = new Physics(this);
         physics.setPhysicsToBall();
-        physicsUpdated = true;
     }
 
     public boolean checkPaddleCollisions(){
@@ -153,13 +152,11 @@ public class GameModel {
 
     public void updateBlockCollisions() {
             for (final Block block : blocks) {
-                // Check for collision with the ball
                 int hitCode = block.checkHitToBlock(gameball.getX(), gameball.getY(), xBallPrevious, yBallPrevious, gameball.getRadius());
                 if (hitCode != Block.NO_HIT && block.checkAndProcessHit(time)) {
-                    block.isAlreadyHit = true; // Mark the block as hit
-
+                    block.isAlreadyHit = true;
                     if (block.type == Block.BLOCK_COUNT_BREAKER) {
-                        block.decrementCount(); // Decrement the count
+                        block.decrementCount();
                         if (block.getHitsToDestroy() == 0) {
                             addToScore(1);
                             block.isDestroyed = true;
@@ -172,10 +169,7 @@ public class GameModel {
                     }
 
                     handleSpecialBlock(block);
-                    setCollisionFlags(hitCode);
-                    if (!physicsUpdated) {
-                        setPhysicsToBall();
-                    }
+                    physics.handleBlockCollisions(hitCode, time);
                 }
             }
 
@@ -185,8 +179,6 @@ public class GameModel {
             }
         }
     }
-
-    private boolean isFreezeStatus = false;
 
     private void handleSpecialBlock(final Block block) {
         if (block.type == Block.BLOCK_CHOCO) {
@@ -206,26 +198,6 @@ public class GameModel {
         } else if (block.type == Block.Block_GHOST) {
             ghostTime = time;
             isGhostStatus = true;
-        }
-    }
-
-    private void setCollisionFlags(int hitCode) {
-        if (hitCode == Block.HIT_RIGHT) {
-            colideToRightBlock = true;
-        } else if (hitCode == Block.HIT_BOTTOM) {
-            colideToBottomBlock = true;
-        } else if (hitCode == Block.HIT_LEFT) {
-            colideToLeftBlock = true;
-        } else if (hitCode == Block.HIT_TOP) {
-            colideToTopBlock = true;
-        } else if (hitCode == Block.HIT_TOP_LEFT) {
-            colideToTopLeftBlock = true;
-        } else if (hitCode == Block.HIT_TOP_RIGHT) {
-            colideToTopRightBlock = true;
-        } else if (hitCode == Block.HIT_BOTTOM_LEFT) {
-            colideToBottomLeftBlock = true;
-        } else if (hitCode == Block.HIT_BOTTOM_RIGHT) {
-            colideToBottomRightBlock = true;
         }
     }
 
@@ -664,9 +636,5 @@ public class GameModel {
 
     public int getSceneWidth(){
         return sceneWidth;
-    }
-
-    public void setPhysicsUpdated(boolean b) {
-        this.physicsUpdated=b;
     }
 }

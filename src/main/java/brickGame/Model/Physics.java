@@ -4,6 +4,8 @@ public class Physics {
     private Ball gameball;
     private GameModel gameModel;
     private Paddle paddle;
+    private int previousHitCode = Block.NO_HIT;
+    private long lastHitTime = 0;
 
     public Physics(GameModel gameModel) {
         this.gameModel = gameModel;
@@ -16,7 +18,6 @@ public class Physics {
         handleGameOverConditions();
         handleBreakCollisions();
         handleWallCollisions();
-        handleBlockCollisions();
     }
 
     private void handleBreakCollisions() {
@@ -88,33 +89,51 @@ public class Physics {
         }
     }
 
-    public void handleBlockCollisions() {
-        handleCornerCollisions();
+    public void handleBlockCollisions(int hitCode, long time) {
+        if (time - lastHitTime > 5) {
+            previousHitCode = Block.NO_HIT;
+        }
 
-        if (gameModel.isColideToTopBlock()) {
-            handleTopBlockCollision();
-        }
-        if (gameModel.isColideToBottomBlock()) {
-            handleBottomBlockCollision();
-        }
-        if (gameModel.isColideToLeftBlock()) {
-            handleLeftBlockCollision();
-        }
-        if (gameModel.isColideToRightBlock()) {
+        if ((hitCode == Block.HIT_TOP_RIGHT && previousHitCode == Block.HIT_BOTTOM_RIGHT) ||
+                (hitCode == Block.HIT_BOTTOM_RIGHT && previousHitCode == Block.HIT_TOP_RIGHT)) {
             handleRightBlockCollision();
-        }
-        if (gameModel.isColideToTopLeftBlock()) {
+        } else if ((hitCode == Block.HIT_TOP_LEFT && previousHitCode == Block.HIT_BOTTOM_LEFT) ||
+                (hitCode == Block.HIT_BOTTOM_LEFT && previousHitCode == Block.HIT_TOP_LEFT)) {
+            handleLeftBlockCollision();
+        } else if ((hitCode == Block.HIT_TOP_LEFT && previousHitCode == Block.HIT_TOP_RIGHT) ||
+                (hitCode == Block.HIT_TOP_RIGHT && previousHitCode == Block.HIT_TOP_LEFT)) {
             handleTopLeftBlockCollision();
-        }
-        if (gameModel.isColideToTopRightBlock()) {
-            handleTopRightBlockCollision();
-        }
-        if (gameModel.isColideToBottomLeftBlock()) {
+        } else if ((hitCode == Block.HIT_BOTTOM_RIGHT && previousHitCode == Block.HIT_BOTTOM_LEFT) ||
+                (hitCode == Block.HIT_BOTTOM_LEFT && previousHitCode == Block.HIT_BOTTOM_RIGHT)) {
             handleBottomLeftBlockCollision();
+        } else if ((hitCode == Block.HIT_TOP_RIGHT && previousHitCode == Block.HIT_BOTTOM_LEFT) ||
+                (hitCode == Block.HIT_BOTTOM_LEFT && previousHitCode == Block.HIT_TOP_RIGHT)) {
+            invertVerticalDirection();
+        } else if ((hitCode == Block.HIT_TOP_LEFT && previousHitCode == Block.HIT_BOTTOM_RIGHT) ||
+                (hitCode == Block.HIT_BOTTOM_RIGHT && previousHitCode == Block.HIT_TOP_LEFT)) {
+            invertVerticalDirection();
         }
-        if (gameModel.isColideToBottomRightBlock()) {
+
+        if (hitCode == Block.HIT_TOP) {
+            handleTopBlockCollision();
+        } else if (hitCode == Block.HIT_BOTTOM) {
+            handleBottomBlockCollision();
+        } else if (hitCode == Block.HIT_LEFT) {
+            handleLeftBlockCollision();
+        } else if (hitCode == Block.HIT_RIGHT) {
+            handleRightBlockCollision();
+        } else if (hitCode == Block.HIT_TOP_LEFT) {
+            handleTopLeftBlockCollision();
+        } else if (hitCode == Block.HIT_TOP_RIGHT) {
+            handleTopRightBlockCollision();
+        } else if (hitCode == Block.HIT_BOTTOM_LEFT) {
+            handleBottomLeftBlockCollision();
+        } else if (hitCode == Block.HIT_BOTTOM_RIGHT) {
             handleBottomRightBlockCollision();
         }
+
+        previousHitCode = hitCode;
+        lastHitTime = time;
     }
 
     private void handleTopBlockCollision() {
@@ -132,78 +151,6 @@ public class Physics {
     private void handleRightBlockCollision() {
         gameball.bounceRight();
     }
-
-    private void handleCornerCollisions() {
-        Ball gameBall = gameModel.getGameball();
-
-        boolean isMovingDown = gameBall.isGoingDown();
-        boolean isMovingUp = gameBall.isGoingUp();
-        boolean isMovingLeft = gameBall.isGoingLeft();
-        boolean isMovingRight = gameBall.isGoingRight();
-
-        if (gameModel.isColideToTopRightBlock() && gameModel.isColideToBottomRightBlock()) {
-            System.out.println("Top Right and Bottom Right");
-            if (isMovingDown) {
-                gameModel.setColideToTopRightBlock(false);
-            } else if (isMovingUp) {
-                gameModel.setColideToBottomRightBlock(false);
-            }
-        }
-
-        if (gameModel.isColideToTopLeftBlock() && gameModel.isColideToBottomLeftBlock()) {
-            System.out.println("Top Left and Bottom Left");
-            if (isMovingDown) {
-                gameModel.setColideToTopLeftBlock(false);
-            } else if (isMovingUp) {
-                gameModel.setColideToBottomLeftBlock(false);
-            }
-        }
-
-        if (gameModel.isColideToTopRightBlock() && gameModel.isColideToTopLeftBlock()) {
-            System.out.println("Top Left and Top Right");
-            if (isMovingRight) {
-                gameModel.setColideToTopLeftBlock(false);
-            } else if (isMovingLeft) {
-                gameModel.setColideToTopRightBlock(false);
-            }
-        }
-
-        if (gameModel.isColideToBottomRightBlock() && gameModel.isColideToBottomLeftBlock()) {
-            System.out.println("Bottom left and Bottom Right");
-            if (isMovingRight) {
-                gameModel.setColideToBottomLeftBlock(false);
-            } else if (isMovingLeft) {
-                gameModel.setColideToBottomRightBlock(false);
-            }
-        }
-
-        if (gameModel.isColideToTopRightBlock() && gameModel.isColideToBottomLeftBlock()) {
-            System.out.println("Top Right and Bottom Left Collision");
-            if (isMovingRight) {
-                gameModel.setColideToBottomLeftBlock(false);
-            } else if (isMovingLeft) {
-                gameModel.setColideToTopRightBlock(false);
-            } else if (isMovingDown) {
-                gameModel.setColideToTopRightBlock(false);
-            } else if (isMovingUp) {
-                gameModel.setColideToBottomLeftBlock(false);
-            }
-        }
-
-        if (gameModel.isColideToTopLeftBlock() && gameModel.isColideToBottomRightBlock()) {
-            System.out.println("Top Left and Bottom Right Collision");
-            if (isMovingRight) {
-                gameModel.setColideToTopLeftBlock(false);
-            } else if (isMovingLeft) {
-                gameModel.setColideToBottomRightBlock(false);
-            } else if (isMovingDown) {
-                gameModel.setColideToTopLeftBlock(false);
-            } else if (isMovingUp) {
-                gameModel.setColideToBottomRightBlock(false);
-            }
-        }
-    }
-
 
     private void handleTopLeftBlockCollision() {
         if (gameball.isGoingUp()) {
@@ -243,5 +190,9 @@ public class Physics {
         } else {
             gameball.bounceDown();
         }
+    }
+
+    private void invertVerticalDirection(){
+        gameball.bounceVertically();
     }
 }
