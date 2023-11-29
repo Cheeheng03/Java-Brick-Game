@@ -1,5 +1,8 @@
 package brickGame;
 
+import brickGame.Controller.GameController;
+import brickGame.Model.GameModel;
+import brickGame.View.GameView;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
