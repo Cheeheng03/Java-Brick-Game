@@ -10,13 +10,11 @@ import javafx.scene.text.Text;
 import java.util.Random;
 
 public class BlockView {
-    private Block block;
-    private Rectangle rect;
+    private final Block block;
+    private final Rectangle rect;
     private Text blockText;
-    private int width = 100;
-    private int height = 30;
-    private int paddingTop = height * 2;
-    private int paddingH = 50;
+    private final int width = 100;
+    private final int height = 30;
 
     public BlockView(Block block) {
         this.block = block;
@@ -28,7 +26,9 @@ public class BlockView {
     }
 
     private void draw() {
+        int paddingH = 50;
         int x = (block.column * width) + paddingH;
+        int paddingTop = height * 2;
         int y = (block.row * height) + paddingTop;
 
         rect.setX(x);
@@ -64,8 +64,8 @@ public class BlockView {
 
     private Text createBlockText(String text) {
         blockText = new Text(text);
-        blockText.setX(rect.getX() + width / 2 - blockText.getLayoutBounds().getWidth() / 2);
-        blockText.setY(rect.getY() + height / 2 + blockText.getLayoutBounds().getHeight() / 4);
+        blockText.setX(rect.getX() + (double) width / 2 - blockText.getLayoutBounds().getWidth() / 2);
+        blockText.setY(rect.getY() + (double) height / 2 + blockText.getLayoutBounds().getHeight() / 4);
         blockText.setFill(Color.WHITE);
         return blockText;
     }

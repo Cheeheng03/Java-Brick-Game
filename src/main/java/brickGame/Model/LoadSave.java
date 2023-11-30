@@ -12,14 +12,6 @@ public class LoadSave {
     public boolean          colideToBreakAndMoveToRight;
     public boolean          colideToRightWall;
     public boolean          colideToLeftWall;
-    public boolean          colideToRightBlock;
-    public boolean          colideToBottomBlock;
-    public boolean          colideToLeftBlock;
-    public boolean          colideToTopBlock;
-    public boolean          colideToTopLeftBlock;
-    public boolean          colideToTopRightBlock;
-    public boolean          colideToBottomLeftBlock;
-    public boolean          colideToBottomRightBlock;
     public int              level;
     public int              score;
     public int              heart;
@@ -54,10 +46,8 @@ public class LoadSave {
             outputStream.writeInt(gameModel.getScore());
             outputStream.writeInt(gameModel.getHeart());
             outputStream.writeInt(gameModel.getDestroyedBlockCount());
-
             outputStream.writeDouble(gameModel.getGameball().getX());
             outputStream.writeDouble(gameModel.getGameball().getY());
-            // Save the previous ball positions
             outputStream.writeDouble(gameModel.getXBallPrevious());
             outputStream.writeDouble(gameModel.getYBallPrevious());
             outputStream.writeDouble(gameModel.getPaddle().getX());
@@ -72,8 +62,6 @@ public class LoadSave {
             outputStream.writeInt(gameModel.getPaddleTimeRemaining());
             outputStream.writeDouble(gameModel.getGameball().getVelocityX());
             outputStream.writeDouble(gameModel.getGameball().getVelocityY());
-
-            // Saving boolean flags
             outputStream.writeBoolean(gameModel.getIsExistHeartBlock());
             outputStream.writeBoolean(gameModel.getIsGoldStatus());
             outputStream.writeBoolean(gameModel.getIsFreezeStatus());
@@ -96,14 +84,6 @@ public class LoadSave {
         outputStream.writeBoolean(gameModel.isColideToBreakAndMoveToRight());
         outputStream.writeBoolean(gameModel.isColideToRightWall());
         outputStream.writeBoolean(gameModel.isColideToLeftWall());
-        outputStream.writeBoolean(gameModel.isColideToRightBlock());
-        outputStream.writeBoolean(gameModel.isColideToBottomBlock());
-        outputStream.writeBoolean(gameModel.isColideToLeftBlock());
-        outputStream.writeBoolean(gameModel.isColideToTopBlock());
-        outputStream.writeBoolean(gameModel.isColideToTopLeftBlock());
-        outputStream.writeBoolean(gameModel.isColideToTopRightBlock());
-        outputStream.writeBoolean(gameModel.isColideToBottomLeftBlock());
-        outputStream.writeBoolean(gameModel.isColideToBottomRightBlock());
     }
 
     private void saveBlocks(ObjectOutputStream outputStream, GameModel gameModel) throws IOException {
@@ -112,7 +92,6 @@ public class LoadSave {
             if (block.isDestroyed) {
                 continue;
             }
-
             int countBreakerCount = 0;
             if (block.type == Block.BLOCK_COUNT_BREAKER) {
                 countBreakerCount = block.getHitsToDestroy();
@@ -131,7 +110,6 @@ public class LoadSave {
             this.score = inputStream.readInt();
             this.heart = inputStream.readInt();
             this.destroyedBlockCount = inputStream.readInt();
-
             this.xBall = inputStream.readDouble();
             this.yBall = inputStream.readDouble();
             this.xBallPrevious = inputStream.readDouble();
@@ -148,26 +126,16 @@ public class LoadSave {
             this.paddleTimeRemaining = inputStream.readInt();
             this.vX = inputStream.readDouble();
             this.vY = inputStream.readDouble();
-
             this.isExistHeartBlock = inputStream.readBoolean();
             this.isGoldStauts = inputStream.readBoolean();
             this.isFreezeStatus = inputStream.readBoolean();
             this.isGhostStatus = inputStream.readBoolean();
             this.goDownBall = inputStream.readBoolean();
             this.goRightBall = inputStream.readBoolean();
-
             this.colideToBreak = inputStream.readBoolean();
             this.colideToBreakAndMoveToRight = inputStream.readBoolean();
             this.colideToRightWall = inputStream.readBoolean();
             this.colideToLeftWall = inputStream.readBoolean();
-            this.colideToRightBlock = inputStream.readBoolean();
-            this.colideToBottomBlock = inputStream.readBoolean();
-            this.colideToLeftBlock = inputStream.readBoolean();
-            this.colideToTopBlock = inputStream.readBoolean();
-            this.colideToTopLeftBlock = inputStream.readBoolean();
-            this.colideToTopRightBlock = inputStream.readBoolean();
-            this.colideToBottomLeftBlock = inputStream.readBoolean();
-            this.colideToBottomRightBlock = inputStream.readBoolean();
 
             try {
                 this.blocks = (ArrayList<BlockSerializable>) inputStream.readObject();

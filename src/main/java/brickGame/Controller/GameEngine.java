@@ -19,7 +19,7 @@ public class GameEngine {
     }
 
     public void setFps(int fps) {
-        this.frameTimeDuration = Duration.millis(1000 / fps);
+        this.frameTimeDuration = Duration.millis((double) 1000 / fps);
     }
 
     private void initialize() {

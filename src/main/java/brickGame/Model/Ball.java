@@ -8,6 +8,7 @@ public class Ball {
     private double velocityY;
     private boolean goingDown;
     private boolean goingRight;
+    private static final float angleAdjustment = 0.3f;
 
     public Ball(double startX, double startY) {
         this.x = startX;
@@ -22,6 +23,18 @@ public class Ball {
     public void updatePosition() {
         this.x += goingRight ? velocityX : -velocityX;
         this.y += goingDown ? velocityY : -velocityY;
+    }
+
+    public void adjustVerticalAngle() {
+        this.velocityY += angleAdjustment;
+    }
+
+    public void adjustHorizontalAngle() {
+        if (this.goingRight) {
+            this.velocityX += angleAdjustment;
+        } else {
+            this.velocityX -= angleAdjustment;
+        }
     }
 
     public void bounceUp() {
@@ -101,11 +114,4 @@ public class Ball {
         return !goingDown;
     }
 
-    public void setGoingDown(boolean goingDown) {
-        this.goingDown = goingDown;
-    }
-
-    public void setGoingRight(boolean goingRight) {
-        this.goingRight = goingRight;
-    }
 }
