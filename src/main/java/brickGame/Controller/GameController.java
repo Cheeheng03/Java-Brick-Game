@@ -21,7 +21,7 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
     private GameModel gameModel;
     private GameView gameView;
     private GameEngine engine;
-    private GameSound gameSound;
+    private final GameSound gameSound;
     private boolean loadFromSave = false;
     private boolean isLevelTransitionInProgress = false;
     private final int sceneWidth = 500;
@@ -224,8 +224,7 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
 
     private void saveGame() {
         if (gameModel.getLevel() < 19 && gameModel.getHeart() > 0) {
-            LoadSave loadSave = new LoadSave();
-            loadSave.saveGameState(gameModel);
+            gameModel.saveGame();
             gameView.showMessage("Game Saved");
         } else {
             gameView.showGameOverAlert();
@@ -233,10 +232,8 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
     }
 
     private void loadGame() {
-        LoadSave loadSave = new LoadSave();
-        loadSave.read();
         try {
-            gameModel.applyStateToGameModel(loadSave);
+            gameModel.loadSavedGame();
             loadFromSave = true;
             gameView = null;
             gameView = new GameView();
@@ -327,9 +324,7 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
                 gameView.show(block.x, block.y, 1);
 
                 if (block.type == Block.BLOCK_CHOCO) {
-                    final Bonus choco = new Bonus(block.row, block.column, Block.BLOCK_CHOCO);
-                    gameModel.addChoco(choco);
-                    Platform.runLater(() -> gameView.addBonusUI(choco));
+                    Platform.runLater(() -> gameView.addBonusUI(gameModel.createChoco(block)));
                 } else if (block.type == Block.BLOCK_STAR) {
                     Platform.runLater(() -> {
                         gameView.addGoldRoot();
@@ -341,9 +336,7 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
                         gameView.addFreezeRoot();
                     });
                 } else if (block.type == Block.BLOCK_MYSTERY) {
-                    final Bonus mystery = new Bonus(block.row, block.column, Block.BLOCK_MYSTERY);
-                    gameModel.addMystery(mystery);
-                    Platform.runLater(() -> gameView.addBonusUI(mystery));
+                    Platform.runLater(() -> gameView.addBonusUI(gameModel.createMystery(block)));
                 } else if (block.type == Block.Block_GHOST) {
                     Platform.runLater(() -> {
                         gameView.addGhostUI();

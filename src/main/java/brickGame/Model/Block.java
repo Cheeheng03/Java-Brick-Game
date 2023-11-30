@@ -77,7 +77,6 @@ public class Block implements Serializable {
         }
     }
 
-
     public int checkHitToBlock(double xBall, double yBall, double xBallPrevious, double yBallPrevious, double ballRadius) {
         final double Epsilon = 0.00001; // Define an epsilon value for floating-point comparison
 
@@ -94,7 +93,6 @@ public class Block implements Serializable {
 
         // Adjust the comparison to include epsilon
         if (right + Epsilon < x || left - Epsilon > x + width || bottom + Epsilon < y || top - Epsilon > y + height) {
-            // No intersection with the block, considering epsilon
             return NO_HIT;
         }
 
@@ -142,7 +140,7 @@ public class Block implements Serializable {
             }
         }
 
-        return NO_HIT; // If none of the conditions met, there is no hit
+        return NO_HIT;
     }
 
     public void decrementCount() {
@@ -162,10 +160,6 @@ public class Block implements Serializable {
 
     public int getHitsToDestroy() {
         return hitsToDestroy;
-    }
-
-    public void setHitsToDestroy(int count) {
-        this.hitsToDestroy = count;
     }
 
     public static int getPaddingTop() {

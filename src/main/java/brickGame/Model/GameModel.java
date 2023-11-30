@@ -28,21 +28,12 @@ public class GameModel {
     private double xBallPrevious;
     private double yBallPrevious;
     private boolean isExistHeartBlock = false;
-    private boolean readyForNextLevel = false;
     private boolean goDownBall                  = true;
     private boolean goRightBall                 = true;
     private boolean colideToBreak               = false;
     private boolean colideToBreakAndMoveToRight = true;
     private boolean colideToRightWall           = false;
     private boolean colideToLeftWall            = false;
-    private boolean colideToRightBlock          = false;
-    private boolean colideToBottomBlock         = false;
-    private boolean colideToLeftBlock           = false;
-    private boolean colideToTopBlock            = false;
-    private boolean colideToTopLeftBlock        = false;
-    private boolean colideToTopRightBlock       = false;
-    private boolean colideToBottomLeftBlock     = false;
-    private boolean colideToBottomRightBlock    = false;
     private boolean isFreezeStatus = false;
 
     public GameModel() {
@@ -127,14 +118,6 @@ public class GameModel {
         colideToBreakAndMoveToRight = false;
         colideToRightWall = false;
         colideToLeftWall = false;
-        colideToRightBlock = false;
-        colideToBottomBlock = false;
-        colideToLeftBlock = false;
-        colideToTopBlock = false;
-        colideToTopLeftBlock = false;
-        colideToTopRightBlock = false;
-        colideToBottomLeftBlock = false;
-        colideToBottomRightBlock = false;
     }
 
     public void setPhysicsToBall() {
@@ -370,16 +353,42 @@ public class GameModel {
         resetBallForNewLevel();
     }
 
+    public void saveGame(){
+        LoadSave loadSave = new LoadSave();
+        loadSave.saveGameState(this);
+    }
+
+    public void loadSavedGame(){
+        LoadSave loadSave = new LoadSave();
+        loadSave.read();
+        applyStateToGameModel(loadSave);
+    }
     public void applyStateToGameModel(LoadSave loadSave) {
         new LoadGame(this).applyStateToGameModel(loadSave);
         processPaddleBonus();
     }
 
+    public Bonus createChoco(Block block){
+        final Bonus choco = new Bonus(block.row, block.column, Block.BLOCK_CHOCO);
+        addChoco(choco);
+        return choco;
+    }
+
+    public Bonus createMystery(Block block){
+        final Bonus mystery  = new Bonus(block.row, block.column, Block.BLOCK_MYSTERY);
+        addMystery(mystery);
+        return mystery;
+    }
+
     // Getter and setter methods
     public Ball getGameball() { return gameball; }
+
     public Paddle getPaddle() { return paddle; }
+
     public ArrayList<Block> getBlocks() { return blocks; }
+
     public void addBlock(Block block) { blocks.add(block); }
+
     public void addChoco(Bonus choco) { chocos.add(choco); }
 
     public void addMystery(Bonus mysteryBlock){
@@ -467,37 +476,12 @@ public class GameModel {
     public boolean isColideToLeftWall() {
         return colideToLeftWall;
     }
-
-    public boolean isColideToRightBlock() {
-        return colideToRightBlock;
+    public int getSceneHeight() {
+        return sceneHeight;
     }
 
-    public boolean isColideToBottomBlock() {
-        return colideToBottomBlock;
-    }
-
-    public boolean isColideToLeftBlock() {
-        return colideToLeftBlock;
-    }
-
-    public boolean isColideToTopBlock() {
-        return colideToTopBlock;
-    }
-
-    public boolean isColideToTopLeftBlock() {
-        return colideToTopLeftBlock;
-    }
-
-    public boolean isColideToTopRightBlock() {
-        return colideToTopRightBlock;
-    }
-
-    public boolean isColideToBottomLeftBlock() {
-        return colideToBottomLeftBlock;
-    }
-
-    public boolean isColideToBottomRightBlock() {
-        return colideToBottomRightBlock;
+    public int getSceneWidth(){
+        return sceneWidth;
     }
 
     // Setters
@@ -520,7 +504,6 @@ public class GameModel {
     public void addToScore(int increment) {
         this.score += increment;
     }
-
 
     public void setHeart(int heart) {
         this.heart = heart;
@@ -558,10 +541,6 @@ public class GameModel {
         this.initialBlockCount = count;
     }
 
-    public void setReadyForNextLevel(boolean ready) {
-        this.readyForNextLevel = ready;
-    }
-
     public void setIsFreezeStatus(boolean isFreezeStatus){
         this.isFreezeStatus = isFreezeStatus;
     }
@@ -582,38 +561,6 @@ public class GameModel {
         this.colideToLeftWall = colideToLeftWall;
     }
 
-    public void setColideToRightBlock(boolean colideToRightBlock) {
-        this.colideToRightBlock = colideToRightBlock;
-    }
-
-    public void setColideToBottomBlock(boolean colideToBottomBlock) {
-        this.colideToBottomBlock = colideToBottomBlock;
-    }
-
-    public void setColideToLeftBlock(boolean colideToLeftBlock) {
-        this.colideToLeftBlock = colideToLeftBlock;
-    }
-
-    public void setColideToTopBlock(boolean colideToTopBlock) {
-        this.colideToTopBlock = colideToTopBlock;
-    }
-
-    public void setColideToTopLeftBlock(boolean colideToTopLeftBlock) {
-        this.colideToTopLeftBlock = colideToTopLeftBlock;
-    }
-
-    public void setColideToTopRightBlock(boolean colideToTopRightBlock) {
-        this.colideToTopRightBlock = colideToTopRightBlock;
-    }
-
-    public void setColideToBottomLeftBlock(boolean colideToBottomLeftBlock) {
-        this.colideToBottomLeftBlock = colideToBottomLeftBlock;
-    }
-
-    public void setColideToBottomRightBlock(boolean colideToBottomRightBlock) {
-        this.colideToBottomRightBlock = colideToBottomRightBlock;
-    }
-
     public void setGoDownBall(boolean goDownBall) {
         this.goDownBall = goDownBall;
     }
@@ -628,13 +575,5 @@ public class GameModel {
 
     public void setLevel(int level) {
         this.level = level;
-    }
-
-    public int getSceneHeight() {
-        return sceneHeight;
-    }
-
-    public int getSceneWidth(){
-        return sceneWidth;
     }
 }

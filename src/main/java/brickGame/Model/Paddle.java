@@ -43,10 +43,6 @@
             return x;
         }
 
-        public int getOriginalWidth(){
-            return originalWidth;
-        }
-
         public void setX(double x) {
             this.x = x;
         }
@@ -54,6 +50,7 @@
         public void setY(double y) {
             this.y = y;
         }
+
         public void setCenterBreakX(double centerBreakX) {
             this.centerBreakX = centerBreakX;
         }
@@ -69,6 +66,7 @@
         public int getHeight() {
             return height;
         }
+
         public double getCenterBreakX() {
             return centerBreakX = x + (double) width / 2;
         }

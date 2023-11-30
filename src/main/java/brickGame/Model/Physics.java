@@ -1,9 +1,9 @@
 package brickGame.Model;
 
 public class Physics {
-    private Ball gameball;
-    private GameModel gameModel;
-    private Paddle paddle;
+    private final Ball gameball;
+    private final GameModel gameModel;
+    private final Paddle paddle;
     private int previousHitCode = Block.NO_HIT;
     private long lastHitTime = 0;
 
@@ -90,6 +90,7 @@ public class Physics {
     }
 
     public void handleBlockCollisions(int hitCode, long time) {
+        gameball.setVelocityY(1.0);
         if (time - lastHitTime > 5) {
             previousHitCode = Block.NO_HIT;
         }
@@ -109,9 +110,11 @@ public class Physics {
         } else if ((hitCode == Block.HIT_TOP_RIGHT && previousHitCode == Block.HIT_BOTTOM_LEFT) ||
                 (hitCode == Block.HIT_BOTTOM_LEFT && previousHitCode == Block.HIT_TOP_RIGHT)) {
             invertVerticalDirection();
+            invertHorizontalDirection();
         } else if ((hitCode == Block.HIT_TOP_LEFT && previousHitCode == Block.HIT_BOTTOM_RIGHT) ||
                 (hitCode == Block.HIT_BOTTOM_RIGHT && previousHitCode == Block.HIT_TOP_LEFT)) {
             invertVerticalDirection();
+            invertHorizontalDirection();
         }
 
         if (hitCode == Block.HIT_TOP) {
@@ -156,8 +159,10 @@ public class Physics {
         if (gameball.isGoingUp()) {
             gameball.bounceLeft();
         } else if (gameball.isGoingLeft()) {
+            gameball.adjustVerticalAngle();
             gameball.bounceUp();
         } else {
+            gameball.adjustVerticalAngle();
             gameball.bounceUp();
         }
     }
@@ -166,8 +171,10 @@ public class Physics {
         if (gameball.isGoingUp()) {
             gameball.bounceRight();
         } else if (gameball.isGoingRight()) {
+            gameball.adjustVerticalAngle();
             gameball.bounceUp();
         } else {
+            gameball.adjustVerticalAngle();
             gameball.bounceUp();
         }
     }
@@ -176,8 +183,10 @@ public class Physics {
         if (gameball.isGoingDown()) {
             gameball.bounceLeft();
         } else if (gameball.isGoingLeft()) {
+            gameball.adjustVerticalAngle();
             gameball.bounceDown();
         } else {
+            gameball.adjustVerticalAngle();
             gameball.bounceDown();
         }
     }
@@ -186,13 +195,19 @@ public class Physics {
         if (gameball.isGoingDown()) {
             gameball.bounceRight();
         } else if (gameball.isGoingRight()) {
+            gameball.adjustVerticalAngle();
             gameball.bounceDown();
         } else {
+            gameball.adjustVerticalAngle();
             gameball.bounceDown();
         }
     }
 
     private void invertVerticalDirection(){
         gameball.bounceVertically();
+    }
+
+    private void invertHorizontalDirection(){
+        gameball.bounceHorizontally();
     }
 }

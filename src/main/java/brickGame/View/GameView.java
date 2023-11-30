@@ -203,6 +203,16 @@ public class GameView {
         paddleRect.setWidth(paddle.getWidth());
     }
 
+    public void updateBonusPosition(Bonus bonus) {
+        Rectangle bonusView = bonus.getBonus();
+        if (bonusView != null) {
+            Platform.runLater(() -> {
+                bonusView.setX(bonus.getX());
+                bonusView.setY(bonus.getY());
+            });
+        }
+    }
+
     public void resumeUI(){
         pauseButton.setText("\u25B6");
     }
@@ -233,11 +243,11 @@ public class GameView {
         alert.setContentText("The game is over and cannot be saved.");
         alert.showAndWait();
     }
-    // Getters for UI components
+
+    // Getters
     public Button getLoadButton() {
         return loadButton;
     }
-
     public Button getNewGameButton() {
         return newGameButton;
     }
@@ -245,8 +255,5 @@ public class GameView {
         return pauseButton;
     }
 
-    public Pane getRoot(){
-        return root;
-    }
 
 }

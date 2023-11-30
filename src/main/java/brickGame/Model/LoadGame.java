@@ -58,14 +58,6 @@ public class LoadGame {
         gameModel.setColideToBreakAndMoveToRight(loadSave.colideToBreakAndMoveToRight);
         gameModel.setColideToRightWall(loadSave.colideToRightWall);
         gameModel.setColideToLeftWall(loadSave.colideToLeftWall);
-        gameModel.setColideToRightBlock(loadSave.colideToRightBlock);
-        gameModel.setColideToBottomBlock(loadSave.colideToBottomBlock);
-        gameModel.setColideToLeftBlock(loadSave.colideToLeftBlock);
-        gameModel.setColideToTopBlock(loadSave.colideToTopBlock);
-        gameModel.setColideToTopLeftBlock(loadSave.colideToTopLeftBlock);
-        gameModel.setColideToTopRightBlock(loadSave.colideToTopRightBlock);
-        gameModel.setColideToBottomLeftBlock(loadSave.colideToBottomLeftBlock);
-        gameModel.setColideToBottomRightBlock(loadSave.colideToBottomRightBlock);
 
         // Restoring directional flags
         gameModel.setGoDownBall(loadSave.goDownBall);
