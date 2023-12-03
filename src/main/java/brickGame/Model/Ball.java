@@ -61,6 +61,14 @@ public class Ball {
         this.goingRight = !this.goingRight;
     }
 
+    public void setGoingDown(boolean goingDown){
+        this.goingDown = goingDown;
+    }
+
+    public void setGoingRight(boolean goingRight){
+        this.goingRight = goingRight;
+    }
+
     // Getters and setters
     public double getX() {
         return x;

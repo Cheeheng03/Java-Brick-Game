@@ -22,7 +22,6 @@ public class Block implements Serializable {
     private int height = 30;
     private int paddingTop = height * 2;
     private int paddingH = 50;
-    public Rectangle rect;
     public static int NO_HIT = -1;
     public static int HIT_RIGHT = 0;
     public static int HIT_BOTTOM = 1;

@@ -203,16 +203,6 @@ public class GameView {
         paddleRect.setWidth(paddle.getWidth());
     }
 
-    public void updateBonusPosition(Bonus bonus) {
-        Rectangle bonusView = bonus.getBonus();
-        if (bonusView != null) {
-            Platform.runLater(() -> {
-                bonusView.setX(bonus.getX());
-                bonusView.setY(bonus.getY());
-            });
-        }
-    }
-
     public void resumeUI(){
         pauseButton.setText("\u25B6");
     }

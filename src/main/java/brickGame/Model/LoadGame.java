@@ -1,9 +1,6 @@
 package brickGame.Model;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class LoadGame {
     private GameModel gameModel;
@@ -60,8 +57,8 @@ public class LoadGame {
         gameModel.setColideToLeftWall(loadSave.colideToLeftWall);
 
         // Restoring directional flags
-        gameModel.setGoDownBall(loadSave.goDownBall);
-        gameModel.setGoRightBall(loadSave.goRightBall);
+        gameModel.getGameball().setGoingDown(loadSave.goDownBall);
+        gameModel.getGameball().setGoingRight(loadSave.goRightBall);
 
         restoreBlocksFromSerializable(loadSave.blocks);
     }

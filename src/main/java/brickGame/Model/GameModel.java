@@ -28,8 +28,6 @@ public class GameModel {
     private double xBallPrevious;
     private double yBallPrevious;
     private boolean isExistHeartBlock = false;
-    private boolean goDownBall                  = true;
-    private boolean goRightBall                 = true;
     private boolean colideToBreak               = false;
     private boolean colideToBreakAndMoveToRight = true;
     private boolean colideToRightWall           = false;
@@ -310,7 +308,6 @@ public class GameModel {
         resetBallForNewLevel();
         gameball.setVelocityX(1.000);
         resetColideFlags();
-        goDownBall = true;
         isGoldStatus = false;
         isFreezeStatus = false;
         isExistHeartBlock = false;
@@ -338,7 +335,6 @@ public class GameModel {
         score = 0;
         gameball.setVelocityX(1.000);
         resetColideFlags();
-        goDownBall = true;
         isGoldStatus = false;
         isFreezeStatus = false;
         isGhostStatus = false;
@@ -559,14 +555,6 @@ public class GameModel {
 
     public void setColideToLeftWall(boolean colideToLeftWall) {
         this.colideToLeftWall = colideToLeftWall;
-    }
-
-    public void setGoDownBall(boolean goDownBall) {
-        this.goDownBall = goDownBall;
-    }
-
-    public void setGoRightBall(boolean goRightBall) {
-        this.goRightBall = goRightBall;
     }
 
     public void setIsExistHeartBlock(boolean isExistHeartBlock) {
