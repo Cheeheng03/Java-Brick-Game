@@ -3,6 +3,10 @@ package brickGame.Model;
 import java.io.*;
 import java.util.ArrayList;
 
+/**
+ * Manages the saving and loading of the game state to and from a file.
+ * This class serializes and deserializes various game attributes including level, score, game object positions, and statuses.
+ */
 public class LoadSave {
     public boolean          isExistHeartBlock;
     public boolean          isGoldStauts;
@@ -38,6 +42,12 @@ public class LoadSave {
     public static String savePathDir = "C:/save/";
     public ArrayList<BlockSerializable> blocks = new ArrayList<BlockSerializable>();
 
+    /**
+     * Saves the current game state to a file.
+     * Serializes various aspects of the game model such as levels, scores, positions of game objects, and more.
+     *
+     * @param gameModel The GameModel instance whose state is to be saved.
+     */
     public void saveGameState(GameModel gameModel) {
         new File(savePathDir).mkdirs();
         File file = new File(savePath);
@@ -79,6 +89,12 @@ public class LoadSave {
         }
     }
 
+    /**
+     * Saves the collision flags of the game to the output stream.
+     *
+     * @param outputStream The ObjectOutputStream to write the collision flags to.
+     * @param gameModel The GameModel instance containing the collision flags.
+     */
     private void saveCollisionFlags(ObjectOutputStream outputStream, GameModel gameModel) throws IOException {
         outputStream.writeBoolean(gameModel.isColideToBreak());
         outputStream.writeBoolean(gameModel.isColideToBreakAndMoveToRight());
@@ -86,6 +102,12 @@ public class LoadSave {
         outputStream.writeBoolean(gameModel.isColideToLeftWall());
     }
 
+    /**
+     * Serializes and saves the blocks' state to the output stream.
+     *
+     * @param outputStream The ObjectOutputStream to write the blocks' state to.
+     * @param gameModel The GameModel instance containing the blocks' information.
+     */
     private void saveBlocks(ObjectOutputStream outputStream, GameModel gameModel) throws IOException {
         ArrayList<BlockSerializable> blockSerializables = new ArrayList<>();
         for (Block block : gameModel.getBlocks()) {
@@ -103,6 +125,10 @@ public class LoadSave {
         outputStream.writeObject(blockSerializables);
     }
 
+    /**
+     * Reads and loads the game state from a file.
+     * Deserializes various attributes of the game such as level, score, positions of game objects, and more.
+     */
     public void read() {
         try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(new File(savePath)))) {
 

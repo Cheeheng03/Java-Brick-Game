@@ -13,8 +13,20 @@ import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
+/**
+ * Handles the display of scoring, messages, and end-game screens in the brick game.
+ * Provides functionalities for showing score effects, messages, game over, and win screens.
+ */
 public class Score {
 
+    /**
+     * Displays a score effect at the specified position.
+     *
+     * @param x The x-coordinate where the score effect is to be displayed.
+     * @param y The y-coordinate where the score effect is to be displayed.
+     * @param scoreAmount The amount of score to display.
+     * @param root The pane where the score label is to be added.
+     */
     public void show(final double x, final double y, int scoreAmount, Pane root) {
         String sign = scoreAmount >= 0 ? "+" : "";
         final Label label = new Label(sign + scoreAmount);
@@ -32,6 +44,12 @@ public class Score {
         timeline.play();
     }
 
+    /**
+     * Displays a message on the screen.
+     *
+     * @param message The message to be displayed.
+     * @param root The pane where the message label is to be added.
+     */
     public void showMessage(String message, Pane root) {
         final Label label = new Label(message);
         label.setTranslateX(220);
@@ -59,11 +77,21 @@ public class Score {
         timeline.play();
     }
 
+    /**
+     * Functional interface for defining the game restart action.
+     */
     @FunctionalInterface
     public interface GameRestartAction {
         void restart();
     }
 
+    /**
+     * Displays the game over screen with the final score and a restart option.
+     *
+     * @param root The pane where the game over screen is to be displayed.
+     * @param restartAction The action to be performed when restarting the game.
+     * @param gameModel The game model containing the final score data.
+     */
     public void showGameOver(Pane root, GameRestartAction restartAction, GameModel gameModel) {
         Rectangle background = new Rectangle();
         background.setWidth(500);
@@ -88,6 +116,13 @@ public class Score {
         root.getChildren().addAll(background, scoreLabel, restart);
     }
 
+    /**
+     * Displays the win screen with the final score and a restart option.
+     *
+     * @param root The pane where the win screen is to be displayed.
+     * @param restartAction The action to be performed when restarting the game.
+     * @param gameModel The game model containing the final score data.
+     */
     public void showWin(Pane root, GameRestartAction restartAction, GameModel gameModel) {
         Rectangle background = new Rectangle();
         background.setWidth(500);

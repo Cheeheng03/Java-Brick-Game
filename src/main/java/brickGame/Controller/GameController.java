@@ -17,6 +17,9 @@ import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * This class is the controller that acts as the intermediary between Model and view, it also handles user interaction
+ */
 public class GameController implements EventHandler<KeyEvent>, GameEngine.OnAction {
     private GameModel gameModel;
     private GameView gameView;
@@ -36,6 +39,12 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
     Stage  primaryStage;
     private static final Logger logger = Logger.getLogger(GameController.class.getName());
 
+    /**
+     * Constructs a GameController with the specified GameModel and GameView.
+     *
+     * @param gameModel The GameModel instance for managing the game's data and logic.
+     * @param gameView  The GameView instance for handling the presentation layer.
+     */
     public GameController(GameModel gameModel, GameView gameView) {
         this.gameModel = gameModel;
         this.gameView = gameView;
@@ -46,6 +55,12 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
         engine.setFps(120);
     }
 
+    /**
+     * Initializes and starts the game with the given stage.
+     * Sets up the game view, game model, and handles the game state based on whether it's a new game or loaded from a save.
+     *
+     * @param primaryStage The primary stage for this application, onto which the scene is set.
+     */
     public void start(Stage primaryStage) {
         this.primaryStage = primaryStage;
 
@@ -79,6 +94,10 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
         }
     }
 
+    /**
+     * Initializes the game elements like ball, paddle, and blocks.
+     * Also handles level transitions and updates the game view accordingly.
+     */
     private void initializeGameElements() {
         if (!loadFromSave) {
             gameModel.addToLevel(1);
@@ -102,6 +121,10 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
         }
     }
 
+    /**
+     * Updates the game status UI when a game is loaded from a save.
+     * This includes setting up the gold, freeze, and ghost status UIs.
+     */
     private void updateGameStatusUIOnLoad() {
         if (gameModel.getIsGoldStatus()) {
             gameView.addGoldRoot();
@@ -116,6 +139,10 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
         }
     }
 
+    /**
+     * Initializes the game buttons such as Load and New Game.
+     * Sets the actions to be performed when these buttons are clicked.
+     */
     private void initializeGameButtons() {
         gameView.getLoadButton().setOnAction(event -> {
             loadGame();
@@ -134,6 +161,10 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
         });
     }
 
+    /**
+     * Initializes the pause button functionality.
+     * Toggles the game pause state and updates the UI accordingly.
+     */
     private void initializePauseButton(){
         gameView.getPauseButton().setFocusTraversable(false);
         gameView.getPauseButton().setOnAction(e -> {
@@ -147,12 +178,20 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
             }
         });
     }
+
+    /**
+     * checks and starting the game engine.
+     */
     private void setupButtonActions() {
         if (gameModel.getLevel() > 1 && gameModel.getLevel() < 19) {
             startGameEngine();
         }
     }
 
+    /**
+     * Starts the game engine.
+     * Initializes a new instance of GameEngine and sets its properties including FPS and initial time.
+     */
     private void startGameEngine() {
         engine = new GameEngine();
         engine.setOnAction(this);
@@ -161,6 +200,11 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
         engine.start();
     }
 
+    /**
+     * Handles key events during the game, such as left and right arrow keys for paddle movement and 'S' for saving the game.
+     *
+     * @param event The KeyEvent to be handled.
+     */
     @Override
     public void handle(KeyEvent event) {
         if(!gameModel.getIsFreezeStatus()) {
@@ -175,6 +219,12 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
         }
     }
 
+    /**
+     * Moves the paddle in the specified direction.
+     * Ensures that the paddle does not move beyond the screen boundaries.
+     *
+     * @param direction The direction in which to move the paddle (LEFT or RIGHT).
+     */
     private void move(final int direction) {
         new Thread(() -> {
             int sleepTime = 4;
@@ -203,6 +253,9 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
         }).start();
     }
 
+    /**
+     * Applies physics to the ball movement and checks for when ball hits the bottom of the screen and game over scenarios.
+     */
     private void setPhysicsToBall() {
         gameModel.setPhysicsToBall();
         if (gameModel.checkHeartDecrement()) {
@@ -210,6 +263,10 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
         }
     }
 
+    /**
+     * Handles the scenario when the game ends, either by losing all hearts or completing all levels.
+     * Displays game over or win screens and stops the background music.
+     */
     private void handleGameEndScenario() {
         gameView.show((double) sceneWidth / 2, (double) sceneHeight / 2, -1);
 
@@ -222,6 +279,10 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
         }
     }
 
+    /**
+     * Saves the current game state.
+     * Ensures that the game is in a savable state before saving.
+     */
     private void saveGame() {
         if (gameModel.getLevel() < 19 && gameModel.getHeart() > 0) {
             gameModel.saveGame();
@@ -231,6 +292,10 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
         }
     }
 
+    /**
+     * Loads a saved game.
+     * Handles exceptions if the saved game cannot be loaded.
+     */
     private void loadGame() {
         try {
             gameModel.loadSavedGame();
@@ -244,6 +309,9 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
         }
     }
 
+    /**
+     * Updates the game state, particularly checking for level completion and initiating level transition if necessary.
+     */
     private void updateGameState() {
         if (gameModel.checkLevelCompletion() && !isLevelTransitionInProgress) {
             isLevelTransitionInProgress = true;
@@ -282,6 +350,10 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
         });
     };
 
+    /**
+     * Updates the game each frame.
+     * Manages ball and block collisions, block destruction, and updates the UI accordingly.
+     */
     @Override
     public void onUpdate() {
         updateLabelsAndPosition();
@@ -299,6 +371,10 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
         updateUIAfterBlockRemoval();
     }
 
+    /**
+     * Updates labels and positions of game elements on the UI.
+     * This includes updating positions of bonuses and the ball.
+     */
     private void updateLabelsAndPosition() {
         Platform.runLater(() -> {
             gameView.updateLabelsAndBall(gameModel);
@@ -312,12 +388,20 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
         });
     }
 
+    /**
+     * Updates the UI after blocks are removed from the game.
+     * This includes making destroyed blocks not visible.
+     */
     private void updateUIAfterBlockRemoval() {
         for (Block block : gameModel.getBlocksToRemove()) {
             Platform.runLater(() -> gameView.setNotVisibleAfterBlockRemoval(block));
         }
     }
 
+    /**
+     * Updates the UI to reflect block collisions.
+     * This includes handling different block types like heart, freeze, gold, etc.
+     */
     private void updateBlockCollisionsUI() {
         for (Block block : gameModel.getBlocks()) {
             if (block.isDestroyed) {
@@ -351,6 +435,10 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
 
     }
 
+    /**
+     * Updates the game physics.
+     * Manages special block statuses and paddle collision, and updates the UI accordingly.
+     */
     public void onPhysicsUpdate() {
         updateGameState();
         setPhysicsToBall();
@@ -389,6 +477,10 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
         updateMysteryUI();
     }
 
+    /**
+     * Updates the UI for chocolate bonus blocks.
+     * Handles the visibility and score update when a chocolate bonus is taken.
+     */
     private void updateChocoUI() {
         Iterator<Bonus> iterator = gameModel.getChocos().iterator();
         while (iterator.hasNext()) {
@@ -402,6 +494,10 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
         }
     }
 
+    /**
+     * Updates the UI for mystery bonus blocks.
+     * Manages the visibility of mystery bonuses when they are taken.
+     */
     private void updateMysteryUI() {
         Iterator<Bonus> iterator = gameModel.getMysteries().iterator();
         while (iterator.hasNext()) {
@@ -413,11 +509,22 @@ public class GameController implements EventHandler<KeyEvent>, GameEngine.OnActi
         }
     }
 
+    /**
+     * Callback method for time updates in the game.
+     *
+     * @param time The current game time.
+     */
     @Override
     public void onTime(long time) {
         this.time = time;
     }
 
+    /**
+     * Handles exceptions that occur during the game.
+     * Logs the exception details for debugging purposes.
+     *
+     * @param e The exception to be handled.
+     */
     private void handleException(Exception e) {
         logger.log(Level.SEVERE, "An error occurred: " + e.getMessage(), e);
     }

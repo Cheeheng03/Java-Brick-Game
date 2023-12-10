@@ -1,12 +1,26 @@
 package brickGame.Model;
 
+/**
+ * Implementation of the CustomLevel interface for level 18 in the brick game.
+ * This class defines the specific layout and types of blocks for level 18,
+ * incorporating various block types to create a unique level experience.
+ */
 public class CustomLevel18 implements CustomLevel {
 
     private GameModel gameModel;
-
+    /**
+     * Constructs a new instance of CustomLevel18.
+     *
+     * @param gameModel The GameModel instance associated with this level, used for managing game state and elements.
+     */
     public CustomLevel18 (GameModel gameModel){
         this.gameModel = gameModel;
     }
+    /**
+     * Initializes the layout and properties of level 18.
+     * Clears any existing blocks and sets up new ones based on a predefined layout,
+     * featuring a mix of different block types for varied gameplay.
+     */
     @Override
     public void initLevel() {
         System.out.println("Custom");

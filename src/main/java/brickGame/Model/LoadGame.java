@@ -2,13 +2,30 @@ package brickGame.Model;
 
 import java.util.ArrayList;
 
+/**
+ * Handles the loading of a saved game state into the GameModel.
+ * This class is responsible for restoring the state of various game elements
+ * such as the ball, paddle, blocks, and various game statuses from a saved state.
+ */
 public class LoadGame {
     private GameModel gameModel;
 
+    /**
+     * Constructs a new LoadGame instance.
+     *
+     * @param gameModel The GameModel instance into which the saved state will be loaded.
+     */
     public LoadGame(GameModel gameModel) {
         this.gameModel = gameModel;
     }
 
+    /**
+     * Applies the saved game state to the GameModel.
+     * Restores the state of the game including levels, scores, game time,
+     * special statuses, and the states of the ball and paddle.
+     *
+     * @param loadSave The LoadSave object containing the saved game state.
+     */
     public void applyStateToGameModel(LoadSave loadSave) {
         gameModel.setLevel(loadSave.level);
         gameModel.setScore(loadSave.score);
@@ -63,6 +80,12 @@ public class LoadGame {
         restoreBlocksFromSerializable(loadSave.blocks);
     }
 
+    /**
+     * Restores the block states from their serializable form.
+     * Converts BlockSerializable objects back into Block objects and adds them to the game model.
+     *
+     * @param blockSerializables The list of BlockSerializable objects representing the saved block states.
+     */
     private void restoreBlocksFromSerializable(ArrayList<BlockSerializable> blockSerializables) {
         gameModel.getBlocks().clear();
         for (BlockSerializable ser : blockSerializables) {

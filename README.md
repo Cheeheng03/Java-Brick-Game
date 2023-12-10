@@ -74,6 +74,8 @@ These new block types contribute to a more dynamic and engaging gaming experienc
 This addition not only increases the overall difficulty but also provides players with additional incentives to explore different strategies for different levels, making the gaming experience more enjoyable.
 
 #### Mystery block
+<img src="https://cdn.discordapp.com/attachments/1045654522711769121/1183358226750779402/mystery.jpg?ex=65880b3a&is=6575963a&hm=668a2b1c432fa896ed67025447bba9264c4d80eb3d055f2d66e86b8905813194&" alt="mystery" style="width:200px;"/>
+
 The mystery block implements more or less the same logic with the choco bonus block. 
 When the player hits the mystery block with the ball, the bonus rectangle will start to drop.
 The player can choose to ignore or claim the mystery bonus element using their paddle. 
@@ -81,21 +83,29 @@ If the player chooses to catch, and has successfully captured the bonus with the
 It will be a 50% chance that the paddle will be lengthened or shorten, this added a mystery essence to the game and creates more probability for the user to design their game plan.
 
 #### Freeze block
+<img src="https://cdn.discordapp.com/attachments/1045654522711769121/1183358226050334830/freeze.jpg?ex=65880b3a&is=6575963a&hm=8641c5447ac3633415002cc034d403d60c68f705f573a1a345bd3ba3dd8a1d62&" alt="freeze" style="width:200px;"/>
+
 The freeze block implements an interesting block which adds a new feature composed of a penalty when the player hits the block using the ball. 
 It freezes the paddle for 3 seconds, meaning that it would not let the user move the paddle for 3 seconds, and it increases the probability of losing a heart as the player could not save the ball from hitting the bottom of the screen with a freezing paddle.
 This increases the difficulty as breaking the freeze block and triggering the freezing of the paddle is inevitable.
 
 #### Ghost Block
+<img src="https://cdn.discordapp.com/attachments/1045654522711769121/1183358226503311360/ghost.jpg?ex=65880b3a&is=6575963a&hm=0eabc359a0f7c34beb2bc1905f6b724884895f334c846847e74bfe3a57e076aa&" alt="ghost" style="width:200px;"/>
+
 The ghost block is a block which will only appear in the last level as it plays a big part in increasing the difficulty of the last level. 
 It makes the ball's UI invisible for 1.5 seconds and lets the user predicts how will the ball bounces and where will it appear again after 1.5 seconds in order to catch it accurately without losing a life.
 
 #### Wall block
+<img src="https://cdn.discordapp.com/attachments/1045654522711769121/1183358225463132180/bedRock.jpg?ex=65880b3a&is=6575963a&hm=bb170497796ce106ca6160a31bbcbe83081a534fbf6d26fc90748fa712ae74cc&" alt="ghost" style="width:200px;"/>
+
 The wall block is a block which will only appear in the last two levels, level 17 and level 18. 
 This block mainly functions as a barrier or an unbreakable wall as it will not be destroyed after the block is hit.
 It will only change the physics of the ball and deflects after hitting it. 
 This block acts as the guard and increase the difficulty as the player has to control the ball to avoid colliding with that block in order to pass through it and collide with other desired blocks.
 
 #### Count Breaker Block
+<img src="https://cdn.discordapp.com/attachments/1045654522711769121/1183358225786085386/countBreaker.jpeg?ex=65880b3a&is=6575963a&hm=22a647e8796bf1ad11133132ec3f9099d7f5888a33b72a45ab1b93ec66156aff&" alt="ghost" style="width:200px;"/>
+
 The count breaker block is a block that functions as a block with HP, and the player has to hit the block multiple of times inorder to destroy it. 
 It will only appear in level 17 of the game. 
 The count or hits left to destroy the block is determined using a randomizer and set at a range between 10 and 20.
@@ -104,10 +114,14 @@ The count or hits left to destroy the block is determined using a randomizer and
 Implemented two new custom levels with customized layout of the blocks and the types of the blocks to increase the difficulty and provide players with fresh challenges. These custom levels feature carefully designed layouts and a diverse array of block types, adding an extra layer of complexity to the game. By introducing new custom levels, players are encouraged to sharpen their skills and think of new game play strategies.
 
 #### Level 17
+<img src="https://cdn.discordapp.com/attachments/1045654522711769121/1183360865026711623/IMG_9368.png?ex=65880db0&is=657598b0&hm=4f3ad1218c19b9fd99b3b785f6c67156649f4c7026ea7f520530d4a41496d7c1&" alt="ghost" style="width:400px;"/>
+
 Level 17 is built using only count breaker block and wall block. 
 6 count breaker blocks with random HP are set to be on top of the scene and two guard wall blocks functions to disrupt the user from breaking the count breaker blocks too easily as difficulty of the ball passing through the wall block is increased gradually.
 
 #### Level 18
+<img src="https://cdn.discordapp.com/attachments/1045654522711769121/1183360626802823188/IMG_9369.png?ex=65880d77&is=65759877&hm=9af45b5e421b839aa9c64d5cfb44fd5b7e1a615aad0651ba87d283a6e466918b&" alt="ghost" style="width:400px;"/>
+
 Level 18 is the final level of the game with the highest difficulty. 
 The layout of the game is tested out and refined to maximize the difficulty but the game still can be won with a good game plan. 
 The ghost blocks and wall blocks are used in this level to bring in more challenges and spice things up for the user.
