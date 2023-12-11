@@ -5,21 +5,26 @@ The paddle's purpose is to deflect the bouncing ball and prevent it from falling
 The main goal of the coursework is to maintain and extend the existing incomplete brick breaker game, not writing the game from scratch.
 
 **IDE:** JetBrains IntelliJ IDEA Community Edition 2023.2.4\
-**Java Version:** 15\
-**SDK:** 19 - Oracle OpenJDK version 21.0.1 JavaFX Version: 11.0.2
+**Java Version:** 19\
+**JavaFX SDK:** Oracle OpenJDK version 21.0.1
 
-# Compilation Instructions
+# Compilation Instructions 
+(For Intellij Community Version 2023.2.4 only)
 1) Download the zip file
 2) Unzip and extract the folder into a location in your computer that you remember
 3) Download and Open IntelliJ IDEA Community Edition
 4) Click "Open" and click on the coursework game folder that you have extracted just now
-5) Click on the hamburger menu in the top left corner and follow instructions to add javafx libraries
+5) If your Intellij IDE does not have the right SDK version installed, please follow the steps below, if you do have the correct version which is Oracle OpenJDK version 21.0.1, please proceed to the next step.
 ```
-File -> Project Structure -> Libraries -> Add -> Add the "lib" folder from your downloaded javafx-sdk-21.0.1 folder -> Apply
+File -> Project Structure -> SDKs -> JDK home path -> browse -> Download JDK -> Download Oracle OpenJDK version 21.0.1
 ``` 
-6) Click on 
+6) Click on the hamburger menu in the top left corner and follow instructions to add javafx libraries
 ```
-Project -> CouseworkGame-master[LabTest2] -> src -> main -> java -> brickGame -> Main.java -> Run 'Main' in the top right corner to run the game
+File -> Project Structure -> Libraries -> Add -> Add the "lib" folder from your downloaded javafx-sdk-21.0.1 folder -> Apply                                    
+``` 
+7) Click on 
+```
+Project -> TangCheeHeng_IntelliJ_19[LabTest2] -> src -> main -> java -> brickGame -> Main.java -> Run 'Main' in the top right corner to run the game
 ```
 
 # Implemented and Working Properly
