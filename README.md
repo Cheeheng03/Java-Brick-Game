@@ -20,7 +20,7 @@ File -> Project Structure -> SDKs -> JDK home path -> browse -> Download JDK -> 
 ``` 
 6) Click on the hamburger menu in the top left corner and follow instructions to add javafx libraries
 ```
-File -> Project Structure -> Libraries -> Add -> Add the "lib" folder from your downloaded javafx-sdk-21.0.1 folder -> Apply                                    
+File -> Project Structure -> Libraries -> Remove any existing libraries -> Add -> Add the "lib" folder from your downloaded javafx-sdk-21.0.1 folder -> Apply                                    
 ``` 
 7) Click on 
 ```
